@@ -53,3 +53,35 @@ This project is a game that is played by two players. The game is a snake game w
 
 - [June Gschwantner](https://github.com/jackboxx)
 - [Stefan Tesch](https://github.com/stevemct)
+
+## Technical main focus 🎯
+
+- Game Design
+  - Game mechanics
+  - Game modes
+  - Power-ups
+  - Maps
+  - Skins
+- Databases
+  - Redis
+- User Interface
+  - Mobile
+  - Web
+- Networking
+  - Websockets
+  - REST API
+  - Multiplayer
+- Deployment
+  - Docker
+- Testing
+  - Unit tests
+  - Integration tests
+  - End-to-end tests
+- Audio
+  - Sound effects
+  - Background music
+  - Volume control
+- Graphics
+  - Animations
+  - Sprites
+  - Particle effects
