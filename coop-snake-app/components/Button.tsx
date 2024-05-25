@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { Pressable, StyleSheet, Text } from "react-native";
 
-export default function Button(props: { text: string; onClick?: () => void }) {
+export default function Button(props: { text: string; onClick?: () => void; disabled?: boolean }) {
   const [buttonColor, setButtonColor] = useState("#ebd29d");
 
   return (
     <Pressable
-      style={[{ backgroundColor: buttonColor }, styles.button]}
+      style={[{ backgroundColor: buttonColor }, styles.button, props.disabled && styles.disabled]}
       onPress={() => {
-        if (props.onClick) props.onClick();
+        if (props.onClick && !props.disabled) props.onClick();
       }}
       onTouchStart={() => {
         setButtonColor("#faffee");
@@ -33,5 +33,8 @@ const styles = StyleSheet.create({
     fontSize: 20,
     textAlign: "center",
     fontWeight: "bold",
+  },
+  disabled: {
+    backgroundColor: "#faffee !important",
   },
 });

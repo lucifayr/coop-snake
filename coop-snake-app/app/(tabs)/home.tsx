@@ -21,7 +21,7 @@ export default function HomeScreen() {
       <StatusBar backgroundColor="#EBAB9D" translucent />
 
       <View style={styles.container}>
-        <Button text="Start new Game" />
+        <Button onClick={() => router.navigate("/game")} text="Start new Game" />
         <Button onClick={() => setIsModalVisible(true)} text="Join Game" />
         <Button onClick={() => router.navigate("/highscores")} text="View Highscores" />
       </View>
