@@ -1,8 +1,13 @@
-import { GameConstants, SnakeBodyDirection } from "./GameConstants";
+import { GameConstants } from "./GameConstants";
 
-export const randomBetween = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1) + min);
+export const randomBetween = (min: number, max: number): number => {
+  return Math.floor(Math.random() * (max - min + 1) + min);
+};
 
-const GameLoop = (entities: { head: any; food: any; tail: any }, e: { touches: any; dispatch: any; events: any }) => {
+const GameLoop = (
+  entities: { head: any; food: any; tail: any },
+  e: { touches: any; dispatch: any; events: any },
+) => {
   let head = entities.head;
   let food = entities.food;
   let tail = entities.tail;
@@ -10,19 +15,19 @@ const GameLoop = (entities: { head: any; food: any; tail: any }, e: { touches: a
   if (e.events.length) {
     for (let i = 0; i < e.events.length; i++) {
       if (e.events[i].type === "move-down" && head.yspeed != -1) {
-        head.rotation = SnakeBodyDirection.DOWN;
+        head.rotation = "DOWN";
         head.yspeed = 1;
         head.xspeed = 0;
       } else if (e.events[i].type === "move-up" && head.yspeed != 1) {
-        head.rotation = SnakeBodyDirection.UP;
+        head.rotation = "UP";
         head.yspeed = -1;
         head.xspeed = 0;
       } else if (e.events[i].type === "move-left" && head.xspeed != 1) {
-        head.rotation = SnakeBodyDirection.LEFT;
+        head.rotation = "LEFT";
         head.yspeed = 0;
         head.xspeed = -1;
       } else if (e.events[i].type === "move-right" && head.xspeed != -1) {
-        head.rotation = SnakeBodyDirection.RIGHT;
+        head.rotation = "RIGHT";
         head.yspeed = 0;
         head.xspeed = 1;
       }
@@ -33,7 +38,6 @@ const GameLoop = (entities: { head: any; food: any; tail: any }, e: { touches: a
 
   if (head.nextMove === 0) {
     head.nextMove = head.updateFrequency;
-    // console.log(head);
     if (
       head.position[0] + head.xspeed < 0 ||
       head.position[0] + head.xspeed >= GameConstants.GRID_SIZE ||
@@ -58,14 +62,22 @@ const GameLoop = (entities: { head: any; food: any; tail: any }, e: { touches: a
 
       // check if it hits the tail
       for (let i = 0; i < tail.elements.length; i++) {
-        if (tail.elements[i][0] === head.position[0] && tail.elements[i][1] === head.position[1]) {
+        if (
+          tail.elements[i][0] === head.position[0] &&
+          tail.elements[i][1] === head.position[1]
+        ) {
           e.dispatch({ type: "game-over" });
         }
       }
 
-      if (head.position[0] === food.position[0] && head.position[1] === food.position[1]) {
+      if (
+        head.position[0] === food.position[0] &&
+        head.position[1] === food.position[1]
+      ) {
         // eating Food
-        tail.elements = [[food.position[0], food.position[1]]].concat(tail.elements);
+        tail.elements = [[food.position[0], food.position[1]]].concat(
+          tail.elements,
+        );
 
         food.position[0] = randomBetween(0, GameConstants.GRID_SIZE - 1);
         food.position[1] = randomBetween(0, GameConstants.GRID_SIZE - 1);

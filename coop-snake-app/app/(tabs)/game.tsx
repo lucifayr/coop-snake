@@ -2,13 +2,20 @@ import Button from "@/components/Button";
 import { Food } from "@/components/Snek/Food";
 import { Head } from "@/components/Snek/Head";
 import { Tail } from "@/components/Snek/Tail";
-import { GameConstants, SnakeBodyDirection } from "@/constants/GameConstants";
-import { GameLoop, randomBetween } from "@/constants/GameLoop";
-import { useSwipe } from "@/constants/useSwipe";
+import { GameConstants } from "@/utils/GameConstants";
+import { GameLoop, randomBetween } from "@/utils/GameLoop";
+import { useSwipe } from "@/utils/useSwipe";
 import { AntDesign } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useRef, useState } from "react";
-import { Alert, Pressable, StatusBar, StyleSheet, Text, View } from "react-native";
+import {
+  Alert,
+  Pressable,
+  StatusBar,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { GameEngine } from "react-native-game-engine";
 
 export default function GameScreen() {
@@ -21,7 +28,13 @@ export default function GameScreen() {
     setRunning(true);
   };
 
-  const { onTouchStart, onTouchEnd } = useSwipe(onSwipeLeft, onSwipeRight, onSwipeUp, onSwipeDown, 3.5);
+  const { onTouchStart, onTouchEnd } = useSwipe(
+    onSwipeLeft,
+    onSwipeRight,
+    onSwipeUp,
+    onSwipeDown,
+    3.5,
+  );
 
   const onEvent = (e: any) => {
     if (e.type === "game-over") {
@@ -47,8 +60,21 @@ export default function GameScreen() {
   }
 
   return (
-    <View style={styles.container} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
-      <Pressable style={{ display: "flex", flexWrap: "nowrap", flexDirection: "row", marginLeft: 40, width: "100%" }} onPress={() => router.navigate("/home")}>
+    <View
+      style={styles.container}
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
+    >
+      <Pressable
+        style={{
+          display: "flex",
+          flexWrap: "nowrap",
+          flexDirection: "row",
+          marginLeft: 40,
+          width: "100%",
+        }}
+        onPress={() => router.navigate("/home")}
+      >
         <AntDesign name="caretleft" size={24} color="white" />
         <Text style={{ color: "white", fontSize: 20 }}>Back</Text>
       </Pressable>
@@ -68,16 +94,23 @@ export default function GameScreen() {
             nextMove: 10,
             updateFrequency: 10,
             size: 20,
-            rotation: SnakeBodyDirection.RIGHT,
-            renderer: <Head position={[0, 0]} rotation={SnakeBodyDirection.RIGHT} size={20} />,
+            rotation: "RIGHT",
+            renderer: <Head />,
           },
           food: {
-            position: [randomBetween(0, GameConstants.GRID_SIZE - 1), randomBetween(0, GameConstants.GRID_SIZE - 1)],
+            position: [
+              randomBetween(0, GameConstants.GRID_SIZE - 1),
+              randomBetween(0, GameConstants.GRID_SIZE - 1),
+            ],
             size: 20,
-            direction: SnakeBodyDirection.RIGHT,
-            renderer: <Food size={20} position={[randomBetween(0, GameConstants.GRID_SIZE - 1), randomBetween(0, GameConstants.GRID_SIZE - 1)]} />,
+            renderer: <Food />,
           },
-          tail: { size: 20, elements: [[0, 0]], renderer: <Tail direction={SnakeBodyDirection.RIGHT} size={20} elements={[]} /> },
+          tail: {
+            size: 20,
+            elements: [[0, 0]],
+            direction: "RIGHT",
+            renderer: <Tail />,
+          },
         }}
         running={running}
         onEvent={onEvent}

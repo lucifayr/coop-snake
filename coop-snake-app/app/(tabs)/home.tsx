@@ -3,7 +3,14 @@ import Input from "@/components/Input";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { Button as Btn, ImageBackground, Modal, StatusBar, StyleSheet, View } from "react-native";
+import {
+  Button as Btn,
+  ImageBackground,
+  Modal,
+  StatusBar,
+  StyleSheet,
+  View,
+} from "react-native";
 
 export default function HomeScreen() {
   const headerHeight = useHeaderHeight();
@@ -12,18 +19,23 @@ export default function HomeScreen() {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const handleModal = () => setIsModalVisible(() => !isModalVisible);
 
-  // useEffect(() => {
-  //   console.log(statusBarRef.current);
-  // }, statusBarRef.current);
-
   return (
-    <ImageBackground style={[styles.background, { top: -headerHeight ?? 0 }]} source={require("@/assets/images/background.png")}>
+    <ImageBackground
+      style={[styles.background, { top: -headerHeight ?? 0 }]}
+      source={require("@/assets/images/background.png")}
+    >
       <StatusBar backgroundColor="#EBAB9D" translucent />
 
       <View style={styles.container}>
-        <Button onClick={() => router.navigate("/game")} text="Start new Game" />
+        <Button
+          onClick={() => router.navigate("/game")}
+          text="Start new Game"
+        />
         <Button onClick={() => setIsModalVisible(true)} text="Join Game" />
-        <Button onClick={() => router.navigate("/highscores")} text="View Highscores" />
+        <Button
+          onClick={() => router.navigate("/highscores")}
+          text="View Highscores"
+        />
       </View>
 
       {/* <View style={styles.centeredView}> */}

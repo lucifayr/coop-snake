@@ -4,12 +4,6 @@ import { Dimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function TabLayout() {
-  // const navigation = useNavigation();
-
-  // React.useEffect(() => {
-  //   navigation.setOptions({ headerShown: false });
-  // }, [navigation]);
-
   return (
     <SafeAreaView
       style={{
