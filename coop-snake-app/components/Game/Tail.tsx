@@ -1,5 +1,5 @@
 import {
-  GameConstants,
+  GAME_CONSTANTS,
   SnakeBodyDirection,
   translateRotation,
 } from "@/utils/GameConstants";
@@ -62,8 +62,8 @@ export class Tail extends PureComponent {
     return (
       <View
         style={{
-          width: GameConstants.GRID_SIZE * this.extraProps.size,
-          height: GameConstants.GRID_SIZE * this.extraProps.size,
+          width: GAME_CONSTANTS.GRID_SIZE * this.extraProps.size,
+          height: GAME_CONSTANTS.GRID_SIZE * this.extraProps.size,
         }}
       >
         {tailList}

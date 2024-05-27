@@ -165,7 +165,9 @@ const styles = StyleSheet.create({
     aspectRatio: 1,
     height: undefined,
     flex: undefined,
-    backgroundColor: "#ff0000", // TODO: nice color
+    borderColor: "black",
+    borderStyle: "solid",
+    borderWidth: 2,
     borderRadius: 10,
     shadowColor: "#000",
     shadowOpacity: 0.3,

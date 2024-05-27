@@ -1,4 +1,4 @@
-import { GameConstants } from "./GameConstants";
+import { GAME_CONSTANTS } from "./GameConstants";
 import { assert } from "./assert";
 
 /**
@@ -7,13 +7,13 @@ import { assert } from "./assert";
  */
 export function pixelPosToSizeIndependent(pixelPos: number): number {
   assert(
-    pixelPos < GameConstants.GRID_SIZE,
+    pixelPos < GAME_CONSTANTS.GRID_SIZE,
     "`pixelPos` should be smaller than the size of the grid",
   );
 
-  return (pixelPos / GameConstants.GRID_SIZE) * 100;
+  return (pixelPos / GAME_CONSTANTS.GRID_SIZE) * 100;
 }
 
 export function snakeSegemntSize(): number {
-  return (1 / GameConstants.GRID_SIZE) * 100;
+  return (1 / GAME_CONSTANTS.GRID_SIZE) * 100;
 }

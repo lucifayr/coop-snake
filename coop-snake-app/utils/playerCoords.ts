@@ -3,13 +3,11 @@ import { Coordinate, coordsArrayFromBytes } from "./binary/coordinate";
 import { GameBinaryMessage } from "./binary/gameBinaryMessage";
 import { PLAYER_BYTE_WIDTH, Player, playerFromByte } from "./binary/player";
 
-// TODO: Add direction
 export type PlayerCoordinates = {
   player: Player;
   coords: Coordinate[];
 };
 
-// TODO: check if the coords list is a valid set of positions for a snake
 export function playerCoordsFromMsg(msg: GameBinaryMessage): PlayerCoordinates {
   assert(
     msg.messageType === "PlayerPosition",

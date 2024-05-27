@@ -20,6 +20,7 @@ export function coordFromBytes(bytes: Uint8Array): Coordinate {
   return { x, y };
 }
 
+// TODO: check if the coords list is a valid set of positions for a snake
 export function coordsArrayFromBytes(bytes: Uint8Array): Coordinate[] {
   const coordCount = Math.floor(bytes.length / COORDINATE_BYTE_WIDTH);
   const coords = new Array(coordCount);

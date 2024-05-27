@@ -1,6 +1,5 @@
-export const GameConstants = {
+export const GAME_CONSTANTS = {
   GRID_SIZE: 40, // TODO: too big
-  CELL_SIZE: 20,
 } as const;
 
 export type SnakeBodyDirection = "UP" | "RIGHT" | "DOWN" | "LEFT";
