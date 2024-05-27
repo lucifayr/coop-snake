@@ -23,5 +23,6 @@ export function dbgNextCoords(
     bytes[i - offset] = data[i];
   }
 
-  return [Uint8Array.of(...bytes), i + 1];
+  const newOffset = i + 1 < data.length ? i + 1 : 0;
+  return [Uint8Array.of(...bytes), newOffset];
 }

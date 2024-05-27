@@ -1,16 +1,13 @@
 import Button from "@/components/Button";
-import { Food } from "@/components/Snek/Food";
-import { Head } from "@/components/Snek/Head";
-import { Tail } from "@/components/Snek/Tail";
-import { GameConstants } from "@/utils/GameConstants";
-import { GameLoop, randomBetween } from "@/utils/GameLoop";
-import { coordsArrayFromBytes } from "@/utils/binary/coordinate";
+import { Hidden } from "@/components/Game/Hidden";
+import { Snake, SnakeProperties } from "@/components/Game/Snake";
+import { GameLoop } from "@/utils/GameLoop";
+import { Coordinate } from "@/utils/binary/coordinate";
+import { Player } from "@/utils/binary/player";
 import { DEBUG_COORDS } from "@/utils/debug/data";
-import { dbgNextCoords } from "@/utils/debug/helpers";
-import { useSwipe } from "@/utils/useSwipe";
 import { AntDesign } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { useEffect, useRef, useState } from "react";
+import { ReactElement, useRef, useState } from "react";
 import {
   Alert,
   Pressable,
@@ -21,29 +18,32 @@ import {
 } from "react-native";
 import { GameEngine } from "react-native-game-engine";
 
+export type GameEntities = {
+  player1: {
+    playerId: Player;
+    coords: Coordinate[];
+    renderer: React.ComponentType<SnakeProperties>;
+  };
+  player2: {
+    playerId: Player;
+    coords: Coordinate[];
+    renderer: React.ComponentType<SnakeProperties>;
+  };
+  debug: {
+    data?: {
+      rawCoords: Uint8Array;
+      rawCoordsOffset: number;
+    };
+    renderer: ReactElement;
+  };
+};
+
 export default function GameScreen() {
   const [running, setRunning] = useState(true);
   const [gameKey, setGameKey] = useState(0);
   const engine = useRef<any>(null);
 
-  useEffect(() => {
-    if (process.env.EXPO_PUBLIC_DEBUG !== "true") {
-      return;
-    }
-
-    const debugCoordsId = process.env.EXPO_PUBLIC_DEBUG_COORDS;
-    if (debugCoordsId) {
-      const debugCoords =
-        DEBUG_COORDS[debugCoordsId as keyof typeof DEBUG_COORDS];
-
-      let [coords, offset] = dbgNextCoords(debugCoords, 0);
-      console.log(coordsArrayFromBytes(coords));
-      [coords, offset] = dbgNextCoords(debugCoords, offset);
-      console.log(coordsArrayFromBytes(coords));
-      [coords, offset] = dbgNextCoords(debugCoords, offset);
-      console.log(coordsArrayFromBytes(coords));
-    }
-  });
+  const isDebugActive = process.env.EXPO_PUBLIC_DEBUG === "true";
 
   // TODO: get websockets to work with ssl :)
   // useEffect(() => {
@@ -72,14 +72,6 @@ export default function GameScreen() {
     setRunning(true);
   };
 
-  const { onTouchStart, onTouchEnd } = useSwipe(
-    onSwipeLeft,
-    onSwipeRight,
-    onSwipeUp,
-    onSwipeDown,
-    3.5,
-  );
-
   const onEvent = (e: any) => {
     if (e.type === "game-over") {
       setRunning(false);
@@ -87,28 +79,24 @@ export default function GameScreen() {
     }
   };
 
-  function onSwipeLeft() {
-    engine?.current.dispatch({ type: "move-left" });
-  }
-
-  function onSwipeRight() {
-    engine?.current.dispatch({ type: "move-right" });
-  }
-
-  function onSwipeUp() {
-    engine?.current.dispatch({ type: "move-up" });
-  }
-
-  function onSwipeDown() {
-    engine?.current.dispatch({ type: "move-down" });
-  }
+  // function onSwipeLeft() {
+  //   engine?.current.dispatch({ type: "move-left" });
+  // }
+  //
+  // function onSwipeRight() {
+  //   engine?.current.dispatch({ type: "move-right" });
+  // }
+  //
+  // function onSwipeUp() {
+  //   engine?.current.dispatch({ type: "move-up" });
+  // }
+  //
+  // function onSwipeDown() {
+  //   engine?.current.dispatch({ type: "move-down" });
+  // }
 
   return (
-    <View
-      style={styles.container}
-      onTouchStart={onTouchStart}
-      onTouchEnd={onTouchEnd}
-    >
+    <View style={styles.container}>
       <Pressable
         style={{
           display: "flex",
@@ -130,32 +118,30 @@ export default function GameScreen() {
         style={styles.gamepane}
         key={gameKey}
         systems={[GameLoop]}
-        entities={{
-          head: {
-            position: [1, 0],
-            xspeed: 1,
-            yspeed: 0,
-            nextMove: 10,
-            updateFrequency: 10,
-            size: 20,
-            rotation: "RIGHT",
-            renderer: <Head />,
-          },
-          food: {
-            position: [
-              randomBetween(0, GameConstants.GRID_SIZE - 1),
-              randomBetween(0, GameConstants.GRID_SIZE - 1),
-            ],
-            size: 20,
-            renderer: <Food />,
-          },
-          tail: {
-            size: 20,
-            elements: [[0, 0]],
-            direction: "RIGHT",
-            renderer: <Tail />,
-          },
-        }}
+        entities={
+          {
+            player1: {
+              playerId: "Player1",
+              coords: [],
+              renderer: Snake,
+            },
+            player2: {
+              playerId: "Player2",
+              coords: [],
+              renderer: Snake,
+            },
+            // TODO: massive HACK, please fix asap
+            debug: {
+              data: isDebugActive
+                ? {
+                    rawCoords: DEBUG_COORDS,
+                    rawCoordsOffset: 0,
+                  }
+                : undefined,
+              renderer: <Hidden />,
+            },
+          } satisfies GameEntities
+        }
         running={running}
         onEvent={onEvent}
       >
@@ -175,11 +161,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   gamepane: {
-    height: 20 * GameConstants.GRID_SIZE,
-    width: 20 * GameConstants.GRID_SIZE,
-    backgroundColor: "#FBAB9D",
-    borderRadius: 10,
+    width: "90%",
+    aspectRatio: 1,
+    height: undefined,
     flex: undefined,
+    backgroundColor: "#ff0000", // TODO: nice color
+    borderRadius: 10,
     shadowColor: "#000",
     shadowOpacity: 0.3,
     shadowRadius: 14,

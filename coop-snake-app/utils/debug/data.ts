@@ -1,6 +1,5 @@
 // TODO: make sure  this is not in the production build :)))))
-export const DEBUG_COORDS = {
-  coordsBottomRightToMoveTopLeft: Uint8Array.of(
+export const DEBUG_COORDS =  Uint8Array.of(
     ...[
       0b00000000, 0b00000000, 0b00000000, 0b00100101, 0b00000000, 0b00000000,
       0b00000000, 0b00100111, 0b00000000, 0b00000000, 0b00000000, 0b00100110,
@@ -7097,5 +7096,4 @@ export const DEBUG_COORDS = {
       0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b11111111, 0b11111111,
       0b11111111, 0b11111111,
     ],
-  ),
-} as const;
+  );
