@@ -19,3 +19,17 @@ export function coordFromBytes(bytes: Uint8Array): Coordinate {
 
   return { x, y };
 }
+
+export function coordsArrayFromBytes(bytes: Uint8Array): Coordinate[] {
+  const coordCount = Math.floor(bytes.length / COORDINATE_BYTE_WIDTH);
+  const coords = new Array(coordCount);
+
+  for (let i = 0; i < bytes.length; i += COORDINATE_BYTE_WIDTH) {
+    const idx = i / COORDINATE_BYTE_WIDTH;
+    const coordBytes = bytes.subarray(i, i + COORDINATE_BYTE_WIDTH);
+    const cord = coordFromBytes(coordBytes);
+    coords[idx] = cord;
+  }
+
+  return coords;
+}

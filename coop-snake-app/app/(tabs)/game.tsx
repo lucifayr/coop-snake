@@ -4,7 +4,9 @@ import { Head } from "@/components/Snek/Head";
 import { Tail } from "@/components/Snek/Tail";
 import { GameConstants } from "@/utils/GameConstants";
 import { GameLoop, randomBetween } from "@/utils/GameLoop";
-import { DEBUG_COORDS } from "@/utils/debug";
+import { coordsArrayFromBytes } from "@/utils/binary/coordinate";
+import { DEBUG_COORDS } from "@/utils/debug/data";
+import { dbgNextCoords } from "@/utils/debug/helpers";
 import { useSwipe } from "@/utils/useSwipe";
 import { AntDesign } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -29,13 +31,17 @@ export default function GameScreen() {
       return;
     }
 
-    console.log(process.env);
-
     const debugCoordsId = process.env.EXPO_PUBLIC_DEBUG_COORDS;
     if (debugCoordsId) {
       const debugCoords =
         DEBUG_COORDS[debugCoordsId as keyof typeof DEBUG_COORDS];
-      console.log(debugCoords);
+
+      let [coords, offset] = dbgNextCoords(debugCoords, 0);
+      console.log(coordsArrayFromBytes(coords));
+      [coords, offset] = dbgNextCoords(debugCoords, offset);
+      console.log(coordsArrayFromBytes(coords));
+      [coords, offset] = dbgNextCoords(debugCoords, offset);
+      console.log(coordsArrayFromBytes(coords));
     }
   });
 
