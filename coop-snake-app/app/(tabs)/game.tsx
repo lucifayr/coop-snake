@@ -4,10 +4,11 @@ import { Head } from "@/components/Snek/Head";
 import { Tail } from "@/components/Snek/Tail";
 import { GameConstants } from "@/utils/GameConstants";
 import { GameLoop, randomBetween } from "@/utils/GameLoop";
+import { DEBUG_COORDS } from "@/utils/debug";
 import { useSwipe } from "@/utils/useSwipe";
 import { AntDesign } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Alert,
   Pressable,
@@ -22,6 +23,21 @@ export default function GameScreen() {
   const [running, setRunning] = useState(true);
   const [gameKey, setGameKey] = useState(0);
   const engine = useRef<any>(null);
+
+  useEffect(() => {
+    if (process.env.EXPO_PUBLIC_DEBUG !== "true") {
+      return;
+    }
+
+    console.log(process.env);
+
+    const debugCoordsId = process.env.EXPO_PUBLIC_DEBUG_COORDS;
+    if (debugCoordsId) {
+      const debugCoords =
+        DEBUG_COORDS[debugCoordsId as keyof typeof DEBUG_COORDS];
+      console.log(debugCoords);
+    }
+  });
 
   // TODO: get websockets to work with ssl :)
   // useEffect(() => {
