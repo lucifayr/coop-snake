@@ -23,6 +23,28 @@ export default function GameScreen() {
   const [gameKey, setGameKey] = useState(0);
   const engine = useRef<any>(null);
 
+  // TODO: get websockets to work with ssl :)
+  // useEffect(() => {
+  //   const socket = new WebSocket(
+  //     `${process.env.EXPO_WEBSOCKET_BASE_URL}/game/tmp`,
+  //   );
+  //   socket.binaryType = "arraybuffer";
+  //
+  //   socket.addEventListener("close", () => {
+  //     assert(false, "TODO: handle socket close");
+  //   });
+  //
+  //   socket.addEventListener("message", (e) => {
+  //     if (e.data instanceof ArrayBuffer) {
+  //       const bytes = new Uint8Array(e.data);
+  //       const msg = binMsgFromBytes(bytes);
+  //       if (msg.messageType === "PlayerPosition") {
+  //         const playerCoords = playerCoordsFromMsg(msg);
+  //       }
+  //     }
+  //   });
+  // }, []);
+
   const restartGame = () => {
     setGameKey((prevKey) => prevKey + 1);
     setRunning(true);

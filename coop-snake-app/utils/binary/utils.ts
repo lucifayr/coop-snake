@@ -1,6 +1,6 @@
 import { assert } from "../assert";
 
-export function bytesToInt32(bytes: Uint8Array): number {
+export function bytesToUint32(bytes: Uint8Array): number {
   assert(
     bytes.length == 4,
     `Byte array should be exactly 4 items long to convert to int 32. Received ${bytes}`,

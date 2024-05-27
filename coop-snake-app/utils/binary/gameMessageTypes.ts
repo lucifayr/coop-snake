@@ -1,17 +1,17 @@
-import { bytesToInt32 } from "./utils";
+import { bytesToUint32 } from "./utils";
 
 export const GAME_MESSAGE_TYPE_BYTES = {
-  SnakePosition: new Uint8Array(1).fill(0),
-  PlayerInput: new Uint8Array(1).fill(1),
+  PlayerPosition: Uint8Array.of(...[0]),
+  PlayerInput: Uint8Array.of(...[1]),
 } as const;
 
 export type GameMessageType = keyof typeof GAME_MESSAGE_TYPE_BYTES;
 
 export function msgTypeFromByte(bytes: Uint8Array): GameMessageType {
-  const int = bytesToInt32(bytes);
+  const int = bytesToUint32(bytes);
   switch (int) {
     case 0:
-      return "SnakePosition";
+      return "PlayerPosition";
     case 1:
       return "PlayerInput";
     default:
