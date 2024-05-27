@@ -1,10 +1,10 @@
 import Button from "@/components/Button";
 import { Hidden } from "@/components/Game/Hidden";
 import { Snake, SnakeProperties } from "@/components/Game/Snake";
-import { GameLoop } from "@/utils/GameLoop";
-import { Coordinate } from "@/utils/binary/coordinate";
-import { Player } from "@/utils/binary/player";
-import { DEBUG_COORDS } from "@/utils/debug/data";
+import { GameLoop } from "@/src/gameLoop";
+import { Coordinate } from "@/src/binary/coordinate";
+import { Player } from "@/src/binary/player";
+import { DEBUG_COORDS } from "@/src/debug/data";
 import { AntDesign } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { ReactElement, useRef, useState } from "react";

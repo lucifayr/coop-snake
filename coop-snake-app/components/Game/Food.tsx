@@ -1,4 +1,4 @@
-import { assert } from "@/utils/assert";
+import { assert } from "@/src/assert";
 import { Component } from "react";
 import { ImageBackground, StyleSheet } from "react-native";
 

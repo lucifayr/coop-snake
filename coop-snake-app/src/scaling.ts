@@ -1,4 +1,4 @@
-import { GAME_CONSTANTS } from "./GameConstants";
+import { GAME_CONSTANTS } from "./gameConstants";
 import { assert } from "./assert";
 
 /**
