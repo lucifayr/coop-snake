@@ -13,3 +13,7 @@ export function pixelPosToSizeIndependent(pixelPos: number): number {
 
   return (pixelPos / GameConstants.GRID_SIZE) * 100;
 }
+
+export function snakeSegemntSize(): number {
+  return (1 / GameConstants.GRID_SIZE) * 100;
+}

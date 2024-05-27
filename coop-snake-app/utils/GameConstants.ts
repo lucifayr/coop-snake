@@ -1,5 +1,5 @@
 export const GameConstants = {
-  GRID_SIZE: 40,
+  GRID_SIZE: 40, // TODO: too big
   CELL_SIZE: 20,
 } as const;
 
