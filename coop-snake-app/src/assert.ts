@@ -3,7 +3,7 @@
  * message (if any) if the condition is `false`.
  */
 export function assert(predicat: boolean, msg?: string) {
-  if (!predicat) {
-    throw new Error(msg ? `ASSERTION FAILED: ${msg}` : "ASSERTION FAILED!");
-  }
+    if (!predicat) {
+        throw new Error(msg ? `ASSERTION FAILED: ${msg}` : "ASSERTION FAILED!");
+    }
 }

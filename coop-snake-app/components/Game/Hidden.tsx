@@ -5,7 +5,7 @@
 import { PureComponent } from "react";
 
 export class Hidden extends PureComponent {
-  render() {
-    return <></>;
-  }
+    render() {
+        return <></>;
+    }
 }
