@@ -1,5 +1,5 @@
 export const GAME_CONSTANTS = {
-    GRID_SIZE: 40, // TODO: too big
+    GRID_SIZE: 20,
 } as const;
 
 export type SnakeBodyDirection = "UP" | "RIGHT" | "DOWN" | "LEFT";

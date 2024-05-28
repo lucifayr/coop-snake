@@ -8,7 +8,7 @@ import { assert } from "./assert";
 export function pixelPosToSizeIndependent(pixelPos: number): number {
     assert(
         pixelPos < GAME_CONSTANTS.GRID_SIZE,
-        "`pixelPos` should be smaller than the size of the grid",
+        `pixelPos should be smaller than the size of the grid. Received ${pixelPos}`,
     );
 
     return (pixelPos / GAME_CONSTANTS.GRID_SIZE) * 100;
