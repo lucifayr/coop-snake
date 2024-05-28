@@ -34,3 +34,29 @@ export function coordsArrayFromBytes(bytes: Uint8Array): Coordinate[] {
 
     return coords;
 }
+
+export function validateCoords(coords: Coordinate[]) {
+    for (let i = 1; i < coords.length; i++) {
+        const current = coords[i];
+        const prev = coords[i - 1];
+
+        const isDuplicate = current.x === prev.x && current.y === prev.y;
+        if (isDuplicate) {
+            console.warn("INVALID COORINATE LIST: duplicate coordinate.");
+            console.warn("pos 1", prev);
+            console.warn("pos 2", current);
+        }
+
+        const dx = current.x - prev.x;
+        const dy = current.x - prev.x;
+        const isDiscontinues = Math.abs(dx) > 1 || Math.abs(dy) > 1;
+
+        if (isDiscontinues) {
+            console.warn(
+                "INVALID COORINATE LIST: coordinates are discontinues.",
+            );
+            console.warn("pos 1", prev);
+            console.warn("pos 2", current);
+        }
+    }
+}

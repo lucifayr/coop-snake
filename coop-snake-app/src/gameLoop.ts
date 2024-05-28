@@ -1,6 +1,6 @@
 import { GameEntities } from "@/app/(tabs)/game";
 import { dbgNextCoords } from "./debug/helpers";
-import { coordsArrayFromBytes } from "./binary/coordinate";
+import { coordsArrayFromBytes, validateCoords } from "./binary/coordinate";
 
 export const randomBetween = (min: number, max: number): number => {
     return Math.floor(Math.random() * (max - min + 1) + min);
@@ -15,7 +15,11 @@ export const GameLoop = (entities: GameEntities): GameEntities => {
         );
 
         entities.debug.data.rawCoordsOffset = offset;
-        entities.player1.coords = coordsArrayFromBytes(coordArrayBytes);
+
+        const coords = coordsArrayFromBytes(coordArrayBytes);
+        validateCoords(coords);
+
+        entities.player1.coords = coords;
     }
 
     return entities;

@@ -31,11 +31,7 @@ fn main() {
                 x_mod
             };
 
-            let seg_idx = if has_to_turn {
-                (snake_size - (s + 1)) * coord_byte_width
-            } else {
-                s * coord_byte_width
-            };
+            let seg_idx = s * coord_byte_width;
 
             let seg_x_bytes = (x as u32).to_be_bytes();
             let seg_y_bytes = (y as u32).to_be_bytes();
