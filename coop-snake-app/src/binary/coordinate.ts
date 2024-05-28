@@ -42,9 +42,13 @@ export function validateCoords(coords: Coordinate[]) {
 
         const isDuplicate = current.x === prev.x && current.y === prev.y;
         if (isDuplicate) {
-            console.warn("INVALID COORINATE LIST: duplicate coordinate.");
-            console.warn("pos 1", prev);
-            console.warn("pos 2", current);
+            console.warn(
+                "INVALID COORINATE LIST: duplicate coordinate.",
+                "pos 1",
+                prev,
+                "pos 2",
+                current,
+            );
         }
 
         const dx = current.x - prev.x;
@@ -54,9 +58,11 @@ export function validateCoords(coords: Coordinate[]) {
         if (isDiscontinues) {
             console.warn(
                 "INVALID COORINATE LIST: coordinates are discontinues.",
+                "pos 1",
+                prev,
+                "pos 2",
+                current,
             );
-            console.warn("pos 1", prev);
-            console.warn("pos 2", current);
         }
     }
 }
