@@ -24,13 +24,19 @@ fn main() {
         for s in 0..snake_size {
             let y = (i + s) / grid_size;
             let x_mod = (i + s) % grid_size;
-            let x = if y % 2 == grid_size % 2 {
+            let has_to_turn = y % 2 == grid_size % 2;
+            let x = if has_to_turn {
                 grid_size - (x_mod + 1)
             } else {
                 x_mod
             };
 
-            let seg_idx = (snake_size - (s + 1)) * coord_byte_width;
+            let seg_idx = if has_to_turn {
+                (snake_size - (s + 1)) * coord_byte_width
+            } else {
+                s * coord_byte_width
+            };
+
             let seg_x_bytes = (x as u32).to_be_bytes();
             let seg_y_bytes = (y as u32).to_be_bytes();
 
