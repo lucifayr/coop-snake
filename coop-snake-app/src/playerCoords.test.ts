@@ -31,9 +31,9 @@ describe("playerCoords", () => {
                 // Coordinate Point 1
                 0, 0, 0, 42, 0, 0, 0, 24,
                 // Coordinate Point 2
-                0, 0, 2, 12, 0, 0, 0, 0,
+                0, 0, 0, 42, 0, 0, 0, 25,
                 // Coordinate Point 3
-                0, 0, 0, 24, 0, 0, 1, 0,
+                0, 0, 0, 42, 0, 0, 0, 26,
             ],
         );
         const msg: GameBinaryMessage = {
@@ -47,8 +47,8 @@ describe("playerCoords", () => {
         expect(output.player).toBe("Player1");
         expect(output.coords).toEqual([
             { x: 42, y: 24 },
-            { x: 524, y: 0 },
-            { x: 24, y: 256 },
+            { x: 42, y: 25 },
+            { x: 42, y: 26 },
         ]);
     });
 

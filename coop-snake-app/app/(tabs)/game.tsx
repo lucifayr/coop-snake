@@ -79,22 +79,6 @@ export default function GameScreen() {
         }
     };
 
-    // function onSwipeLeft() {
-    //   engine?.current.dispatch({ type: "move-left" });
-    // }
-    //
-    // function onSwipeRight() {
-    //   engine?.current.dispatch({ type: "move-right" });
-    // }
-    //
-    // function onSwipeUp() {
-    //   engine?.current.dispatch({ type: "move-up" });
-    // }
-    //
-    // function onSwipeDown() {
-    //   engine?.current.dispatch({ type: "move-down" });
-    // }
-
     return (
         <View style={styles.container}>
             <Pressable

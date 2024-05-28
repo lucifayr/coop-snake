@@ -6,7 +6,6 @@ export const randomBetween = (min: number, max: number): number => {
     return Math.floor(Math.random() * (max - min + 1) + min);
 };
 
-// events: { touches: any; dispatch: any; events: any },
 export const GameLoop = (entities: GameEntities): GameEntities => {
     if (entities.debug.data) {
         const [coordArrayBytes, offset] = dbgNextCoords(
