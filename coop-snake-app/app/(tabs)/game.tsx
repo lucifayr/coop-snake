@@ -58,11 +58,10 @@ export default function GameScreen() {
         const url = `${process.env.EXPO_PUBLIC_WEBSOCKET_BASE_URL}/game/tmp`;
         const socket = new WebSocket(url);
 
-        socket.addEventListener("error", (e) => {
+        const errCallback = (e: any) => {
             console.error(e);
-        });
-
-        socket.addEventListener("message", (e) => {
+        };
+        const msgCallback = (e: any) => {
             if (e.data instanceof ArrayBuffer) {
                 const bytes = new Uint8Array(e.data);
                 const msg = binMsgFromBytes(bytes);
@@ -74,9 +73,16 @@ export default function GameScreen() {
                     );
                 }
             }
-        });
+        };
 
-        return () => socket.close();
+        socket.addEventListener("message", msgCallback);
+        socket.addEventListener("error", errCallback);
+
+        return () => {
+            socket.removeEventListener("message", msgCallback);
+            socket.removeEventListener("error", errCallback);
+            socket.close();
+        };
     }, []);
 
     const restartGame = () => {

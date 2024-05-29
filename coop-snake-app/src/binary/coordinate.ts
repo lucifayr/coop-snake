@@ -43,8 +43,6 @@ export function validateCoords(coords: Coordinate[]) {
 
         const isDuplicate = current.x === prev.x && current.y === prev.y;
         if (isDuplicate) {
-            warnCount++;
-
             console.warn(
                 "INVALID COORINATE LIST: duplicate coordinate.",
                 "pos 1",
@@ -52,11 +50,6 @@ export function validateCoords(coords: Coordinate[]) {
                 "pos 2",
                 current,
             );
-        }
-
-        if (warnCount > 3) {
-            console.log("INVALID COORINATE LIST: Hidding additional errors.");
-            break;
         }
 
         const dx = current.x - prev.x;
@@ -71,6 +64,15 @@ export function validateCoords(coords: Coordinate[]) {
                 "pos 2",
                 current,
             );
+        }
+
+        if (isDiscontinues || isDuplicate) {
+            warnCount++;
+        }
+
+        if (warnCount > 3) {
+            console.log("INVALID COORINATE LIST: Hidding additional errors.");
+            break;
         }
     }
 }
