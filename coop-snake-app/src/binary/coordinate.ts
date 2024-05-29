@@ -36,12 +36,15 @@ export function coordsArrayFromBytes(bytes: Uint8Array): Coordinate[] {
 }
 
 export function validateCoords(coords: Coordinate[]) {
+    let warnCount = 0;
     for (let i = 1; i < coords.length; i++) {
         const current = coords[i];
         const prev = coords[i - 1];
 
         const isDuplicate = current.x === prev.x && current.y === prev.y;
         if (isDuplicate) {
+            warnCount++;
+
             console.warn(
                 "INVALID COORINATE LIST: duplicate coordinate.",
                 "pos 1",
@@ -49,6 +52,11 @@ export function validateCoords(coords: Coordinate[]) {
                 "pos 2",
                 current,
             );
+        }
+
+        if (warnCount > 3) {
+            console.log("INVALID COORINATE LIST: Hidding additional errors.");
+            break;
         }
 
         const dx = current.x - prev.x;

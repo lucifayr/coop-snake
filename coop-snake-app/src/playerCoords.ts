@@ -23,6 +23,7 @@ export function playerCoordsFromMsg(msg: GameBinaryMessage): PlayerCoordinates {
     const coords = coordsArrayFromBytes(
         data.subarray(PLAYER_BYTE_WIDTH, msg.dataLenght),
     );
+
     validateCoords(coords);
 
     return { player, coords };

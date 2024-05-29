@@ -9,7 +9,8 @@ export type GameBinaryMessage = {
     data: Uint8Array;
 };
 
-const MESSAGE_VERSION = parseInt(process.env.EXPO_MESSAGE_VERSION ?? "");
+export const MESSAGE_VERSION = 1;
+
 const MESSAGE_HEADER_WIDTH_VERSION = 1;
 const MESSAGE_HEADER_WIDTH_TYPE = 4;
 const MESSAGE_HEADER_WIDTH_DATA_LENGTH = 4;

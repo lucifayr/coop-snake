@@ -7,7 +7,7 @@ import { Player } from "@/src/binary/player";
 import { DEBUG_COORDS } from "@/src/debug/data";
 import { AntDesign } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { ReactElement, useRef, useState } from "react";
+import { ReactElement, useEffect, useRef, useState } from "react";
 import {
     Alert,
     Pressable,
@@ -17,6 +17,8 @@ import {
     View,
 } from "react-native";
 import { GameEngine } from "react-native-game-engine";
+import { playerCoordsFromMsg } from "@/src/playerCoords";
+import { binMsgFromBytes } from "@/src/binary/gameBinaryMessage";
 
 export type GameEntities = {
     player1: {
@@ -45,27 +47,31 @@ export default function GameScreen() {
 
     const isDebugActive = process.env.EXPO_PUBLIC_DEBUG === "true";
 
-    // TODO: get websockets to work with ssl :)
-    // useEffect(() => {
-    //   const socket = new WebSocket(
-    //     `${process.env.EXPO_WEBSOCKET_BASE_URL}/game/tmp`,
-    //   );
-    //   socket.binaryType = "arraybuffer";
-    //
-    //   socket.addEventListener("close", () => {
-    //     assert(false, "TODO: handle socket close");
-    //   });
-    //
-    //   socket.addEventListener("message", (e) => {
-    //     if (e.data instanceof ArrayBuffer) {
-    //       const bytes = new Uint8Array(e.data);
-    //       const msg = binMsgFromBytes(bytes);
-    //       if (msg.messageType === "PlayerPosition") {
-    //         const playerCoords = playerCoordsFromMsg(msg);
-    //       }
-    //     }
-    //   });
-    // }, []);
+    useEffect(() => {
+        if (isDebugActive) {
+            return;
+        }
+
+        const url = `${process.env.EXPO_PUBLIC_WEBSOCKET_BASE_URL}/game/tmp`;
+        const socket = new WebSocket(url);
+
+        socket.addEventListener("error", (e) => {
+            console.error(e);
+        });
+
+        socket.addEventListener("message", (e) => {
+            if (e.data instanceof ArrayBuffer) {
+                const bytes = new Uint8Array(e.data);
+                const msg = binMsgFromBytes(bytes);
+                if (msg.messageType === "PlayerPosition") {
+                    const playerCoords = playerCoordsFromMsg(msg);
+                    console.log(playerCoords);
+                }
+            }
+        });
+
+        return () => socket.close();
+    }, []);
 
     const restartGame = () => {
         setGameKey((prevKey) => prevKey + 1);
