@@ -19,6 +19,7 @@ import {
 import { GameEngine } from "react-native-game-engine";
 import { playerCoordsFromMsg } from "@/src/playerCoords";
 import { binMsgFromBytes } from "@/src/binary/gameBinaryMessage";
+import { useCoordinateStore } from "@/src/stores/coordinateStore";
 
 export type GameEntities = {
     player1: {
@@ -45,6 +46,8 @@ export default function GameScreen() {
     const [gameKey, setGameKey] = useState(0);
     const engine = useRef<any>(null);
 
+    const { updatePlayerCoords } = useCoordinateStore();
+
     const isDebugActive = process.env.EXPO_PUBLIC_DEBUG === "true";
 
     useEffect(() => {
@@ -65,7 +68,10 @@ export default function GameScreen() {
                 const msg = binMsgFromBytes(bytes);
                 if (msg.messageType === "PlayerPosition") {
                     const playerCoords = playerCoordsFromMsg(msg);
-                    console.log(playerCoords);
+                    updatePlayerCoords(
+                        playerCoords.player,
+                        playerCoords.coords,
+                    );
                 }
             }
         });
