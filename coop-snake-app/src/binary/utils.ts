@@ -1,5 +1,13 @@
 import { assert } from "../assert";
 
+export function viewSlice(
+    view: DataView,
+    offset: number,
+    len: number,
+): DataView {
+    return new DataView(view.buffer, offset + view.byteOffset, len);
+}
+
 export function bytesToUint32(bytes: Uint8Array): number {
     assert(
         bytes.length === 4,

@@ -22,7 +22,9 @@ export const GameLoop = (
 
         entities.debug.data.rawCoordsOffset = offset;
 
-        const coords = coordsArrayFromBytes(coordArrayBytes);
+        const coords = coordsArrayFromBytes(
+            new DataView(coordArrayBytes.buffer),
+        );
         validateCoords(coords);
 
         entities.player1.coords = coords;

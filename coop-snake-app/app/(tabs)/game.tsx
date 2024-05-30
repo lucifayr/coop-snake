@@ -2,7 +2,7 @@ import Button from "@/components/Button";
 import { Hidden } from "@/components/Game/Hidden";
 import { Snake, SnakeProperties } from "@/components/Game/Snake";
 import { GameLoop } from "@/src/gameLoop";
-import { Coordinate } from "@/src/binary/coordinate";
+import { COORDINATE_BYTE_WIDTH, Coordinate } from "@/src/binary/coordinate";
 import { Player } from "@/src/binary/player";
 import { DEBUG_COORDS } from "@/src/debug/data";
 import { AntDesign } from "@expo/vector-icons";
@@ -20,8 +20,10 @@ import { GameEngine } from "react-native-game-engine";
 import { playerCoordsFromMsg } from "@/src/playerCoords";
 import { binMsgFromBytes } from "@/src/binary/gameBinaryMessage";
 import { useCoordinateStore } from "@/src/stores/coordinateStore";
-import { perfStart } from "@/src/logging";
 import { GameCanvas } from "@/components/Game/GameCanvas";
+import { useBuffer } from "@/src/binary/useBuffer";
+import { GAME_CONSTANTS } from "@/src/gameConstants";
+import { perfStart } from "@/src/logging";
 
 export type GameEntities = {
     player1: {
@@ -49,6 +51,12 @@ export default function GameScreen() {
     const engine = useRef<any>(null);
 
     const { updatePlayerCoords } = useCoordinateStore();
+    const { view, writeCanonicalBytes } = useBuffer(
+        GAME_CONSTANTS.GRID_SIZE *
+            GAME_CONSTANTS.GRID_SIZE *
+            COORDINATE_BYTE_WIDTH *
+            16,
+    );
 
     const isDebugActive = process.env.EXPO_PUBLIC_DEBUG === "true";
 
@@ -64,19 +72,20 @@ export default function GameScreen() {
             console.error(e);
         };
         const msgCallback = (e: any) => {
-            if (e.data instanceof ArrayBuffer) {
-                const bytes = new Uint8Array(e.data);
-                const msg = binMsgFromBytes(bytes);
+            const data = e?.data;
+            if (data instanceof ArrayBuffer) {
+                writeCanonicalBytes(new DataView(data));
+                const msg = binMsgFromBytes(view());
 
                 if (msg.messageType === "PlayerPosition") {
-                    const perfCoords = perfStart("coords from msg bytes");
                     const playerCoords = playerCoordsFromMsg(msg);
-                    perfCoords.end();
 
+                    const p = perfStart("parse coords");
                     updatePlayerCoords(
                         playerCoords.player,
                         playerCoords.coords,
                     );
+                    p.end();
                 }
             }
         };

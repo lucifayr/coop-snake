@@ -5,7 +5,8 @@ import {
     validateCoords,
 } from "./binary/coordinate";
 import { GameBinaryMessage } from "./binary/gameBinaryMessage";
-import { PLAYER_BYTE_WIDTH, Player, playerFromByte } from "./binary/player";
+import { PLAYER_BYTE_WIDTH, Player, playerFromU8 } from "./binary/player";
+import { viewSlice } from "./binary/utils";
 
 export type PlayerCoordinates = {
     player: Player;
@@ -18,10 +19,13 @@ export function playerCoordsFromMsg(msg: GameBinaryMessage): PlayerCoordinates {
         `Expected type of message to be 'PlayerPosition'. Received ${msg.messageType}.`,
     );
 
-    const data = msg.data;
-    const player = playerFromByte(msg.data.subarray(0, PLAYER_BYTE_WIDTH));
+    const player = playerFromU8(msg.data.getUint8(0));
     const coords = coordsArrayFromBytes(
-        data.subarray(PLAYER_BYTE_WIDTH, msg.dataLenght),
+        viewSlice(
+            msg.data,
+            PLAYER_BYTE_WIDTH,
+            msg.data.byteLength - PLAYER_BYTE_WIDTH,
+        ),
     );
 
     validateCoords(coords);

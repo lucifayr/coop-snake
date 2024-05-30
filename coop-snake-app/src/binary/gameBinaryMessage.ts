@@ -1,12 +1,11 @@
 import { assert } from "../assert";
-import { GameMessageType, msgTypeFromByte } from "./gameMessageTypes";
-import { bytesToUint32 } from "./utils";
+import { GameMessageType, msgTypeFromU32 } from "./gameMessageTypes";
 
 export type GameBinaryMessage = {
     version: number;
     messageType: GameMessageType;
     dataLenght: number;
-    data: Uint8Array;
+    data: DataView;
 };
 
 export const MESSAGE_VERSION = 1;
@@ -15,32 +14,29 @@ const MESSAGE_HEADER_WIDTH_VERSION = 1;
 const MESSAGE_HEADER_WIDTH_TYPE = 4;
 const MESSAGE_HEADER_WIDTH_DATA_LENGTH = 4;
 
-export function binMsgFromBytes(bytes: Uint8Array): GameBinaryMessage {
-    const version = bytes[0];
+export function binMsgFromBytes(bytes: DataView): GameBinaryMessage {
+    const version = bytes.getUint8(0);
     assert(
         version === MESSAGE_VERSION,
         `Version mismatch. Expected ${MESSAGE_VERSION}. Received ${version}.`,
     );
 
     const typeStartIdx = MESSAGE_HEADER_WIDTH_VERSION;
-    const typeEndIdx = typeStartIdx + MESSAGE_HEADER_WIDTH_TYPE;
-    const typeBytes = bytes.subarray(typeStartIdx, typeEndIdx);
-    const type = msgTypeFromByte(typeBytes);
+    const typeInt = bytes.getUint32(typeStartIdx);
+    const type = msgTypeFromU32(typeInt);
 
-    const lenStartIdx = typeEndIdx;
-    const lenEndIdx = lenStartIdx + MESSAGE_HEADER_WIDTH_DATA_LENGTH;
-    const lenBytes = bytes.subarray(lenStartIdx, lenEndIdx);
-    const len = bytesToUint32(lenBytes);
+    const lenStartIdx = typeStartIdx + MESSAGE_HEADER_WIDTH_TYPE;
+    const len = bytes.getUint32(lenStartIdx);
 
-    const dataStartIdx = lenEndIdx;
+    const dataStartIdx = lenStartIdx + MESSAGE_HEADER_WIDTH_DATA_LENGTH;
     const dataEndIdx = dataStartIdx + len;
+
     assert(
-        bytes.length >= dataEndIdx,
-        `Message is too short. Expected minium length ${dataEndIdx} but only got length ${bytes.length}`,
+        bytes.byteLength >= dataEndIdx,
+        `Message is too short. Expected minium length ${dataEndIdx} but only got length ${bytes.byteLength}`,
     );
 
-    const data = bytes.subarray(dataStartIdx, dataEndIdx);
-
+    const data = new DataView(bytes.buffer, dataStartIdx, len);
     return {
         version,
         data,

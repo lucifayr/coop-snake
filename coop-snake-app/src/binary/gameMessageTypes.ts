@@ -7,15 +7,14 @@ export const GAME_MESSAGE_TYPE_BYTES = {
 
 export type GameMessageType = keyof typeof GAME_MESSAGE_TYPE_BYTES;
 
-export function msgTypeFromByte(bytes: Uint8Array): GameMessageType {
-    const int = bytesToUint32(bytes);
-    switch (int) {
+export function msgTypeFromU32(value: number): GameMessageType {
+    switch (value) {
         case 0:
             return "PlayerPosition";
         case 1:
             return "PlayerInput";
         default:
-            throw new Error(`Expected valid message type. Received ${int}`);
+            throw new Error(`Expected valid message type. Received ${value}`);
     }
 }
 
