@@ -6,7 +6,7 @@ export type Coordinate = {
     y: number;
 };
 
-export const COORDINATE_BYTE_WIDTH = 8;
+export const COORDINATE_BYTE_WIDTH = 4;
 
 export function coordsArrayFromBytes(bytes: DataView): Coordinate[] {
     assert(
@@ -18,8 +18,8 @@ export function coordsArrayFromBytes(bytes: DataView): Coordinate[] {
     const coords = new Array(coordCount);
 
     for (let i = 0; i < bytes.byteLength; i += COORDINATE_BYTE_WIDTH) {
-        const x = bytes.getUint32(i);
-        const y = bytes.getUint32(i + 4);
+        const x = bytes.getUint16(i);
+        const y = bytes.getUint16(i + 2);
 
         const idx = i / COORDINATE_BYTE_WIDTH;
         coords[idx] = { x, y };

@@ -98,7 +98,6 @@ export default function GameScreen() {
         const onPlainMsg = (data: string) => {
             const msg = parsePlainTextMsg(data);
             if (msg.type === "player-token") {
-                console.log(msg);
                 token.current = parseInt(msg.token);
             }
             if (msg.type === "session-key") {

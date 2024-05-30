@@ -19,7 +19,7 @@ fn main() {
     let mut data = Vec::new();
 
     for i in (0..grid_size * grid_size - (snake_size - 1)).rev() {
-        let coord_byte_width = 8;
+        let coord_byte_width = 4;
         let mut segs = vec![0; snake_size * coord_byte_width];
         for s in 0..snake_size {
             let y = (i + s) / grid_size;
@@ -33,16 +33,16 @@ fn main() {
 
             let seg_idx = s * coord_byte_width;
 
-            let seg_x_bytes = (x as u32).to_be_bytes();
-            let seg_y_bytes = (y as u32).to_be_bytes();
+            let seg_x_bytes = (x as u16).to_be_bytes();
+            let seg_y_bytes = (y as u16).to_be_bytes();
 
-            segs[seg_idx..seg_idx + 4].copy_from_slice(&seg_x_bytes);
-            segs[seg_idx + 4..seg_idx + 8].copy_from_slice(&seg_y_bytes);
+            segs[seg_idx..seg_idx + 2].copy_from_slice(&seg_x_bytes);
+            segs[seg_idx + 2..seg_idx + 4].copy_from_slice(&seg_y_bytes);
         }
 
         data.append(&mut segs);
 
-        let mut term = vec![255, 255, 255, 255];
+        let mut term = vec![255, 255];
         data.append(&mut term);
     }
 
