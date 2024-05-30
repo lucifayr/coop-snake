@@ -19,11 +19,11 @@ import {
 import { GameEngine } from "react-native-game-engine";
 import { playerCoordsFromMsg } from "@/src/playerCoords";
 import { binMsgFromBytes } from "@/src/binary/gameBinaryMessage";
-import { useCoordinateStore } from "@/src/stores/coordinateStore";
 import { GameCanvas } from "@/components/Game/GameCanvas";
 import { useBuffer } from "@/src/binary/useBuffer";
 import { GAME_CONSTANTS } from "@/src/gameConstants";
 import { perfStart } from "@/src/logging";
+import { setCoords } from "@/src/stores/coordinateStore";
 
 export type GameEntities = {
     player1: {
@@ -50,13 +50,13 @@ export default function GameScreen() {
     const [gameKey, setGameKey] = useState(0);
     const engine = useRef<any>(null);
 
-    const { updatePlayerCoords } = useCoordinateStore();
-    const { view, writeCanonicalBytes } = useBuffer(
-        GAME_CONSTANTS.GRID_SIZE *
+    const { view: msgView, writeCanonicalBytes: msgWriteCanonicalBytes } =
+        useBuffer(
             GAME_CONSTANTS.GRID_SIZE *
-            COORDINATE_BYTE_WIDTH *
-            16,
-    );
+                GAME_CONSTANTS.GRID_SIZE *
+                COORDINATE_BYTE_WIDTH *
+                16,
+        );
 
     const isDebugActive = process.env.EXPO_PUBLIC_DEBUG === "true";
 
@@ -74,19 +74,17 @@ export default function GameScreen() {
         const msgCallback = (e: any) => {
             const data = e?.data;
             if (data instanceof ArrayBuffer) {
-                writeCanonicalBytes(new DataView(data));
-                const msg = binMsgFromBytes(view());
+                const p = perfStart("parse msg");
+
+                msgWriteCanonicalBytes(new DataView(data));
+                const msg = binMsgFromBytes(msgView());
 
                 if (msg.messageType === "PlayerPosition") {
                     const playerCoords = playerCoordsFromMsg(msg);
-
-                    const p = perfStart("parse coords");
-                    updatePlayerCoords(
-                        playerCoords.player,
-                        playerCoords.coords,
-                    );
-                    p.end();
+                    setCoords(playerCoords.player, playerCoords.coords);
                 }
+
+                p.end();
             }
         };
 
@@ -98,7 +96,7 @@ export default function GameScreen() {
             socket.removeEventListener("error", errCallback);
             socket.close();
         };
-    }, []);
+    }, [isDebugActive, msgView, msgWriteCanonicalBytes]);
 
     const restartGame = () => {
         setGameKey((prevKey) => prevKey + 1);

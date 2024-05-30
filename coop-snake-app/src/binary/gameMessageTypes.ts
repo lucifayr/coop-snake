@@ -1,5 +1,3 @@
-import { bytesToUint32 } from "./utils";
-
 export const GAME_MESSAGE_TYPE_BYTES = {
     PlayerPosition: Uint8Array.of(...[0]),
     PlayerInput: Uint8Array.of(...[1]),

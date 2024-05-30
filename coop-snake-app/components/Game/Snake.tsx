@@ -4,7 +4,6 @@ import { Group, Rect } from "@shopify/react-native-skia";
 import { PLAYERS, Player } from "@/src/binary/player";
 import { gridPosToPixels, snakeSegemntSize } from "@/src/scaling";
 import { Component } from "react";
-import { StyleSheet } from "react-native";
 
 export type SnakeProperties = {
     playerId: Player;
@@ -64,10 +63,3 @@ function playerColor(player: Player, isHead: boolean): string {
             return "#00ff00";
     }
 }
-
-const styles = StyleSheet.create({
-    snake: { width: "100%", height: "100%" },
-    segment: {
-        position: "absolute",
-    },
-});

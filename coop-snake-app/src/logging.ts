@@ -21,15 +21,15 @@ export type BatchLog = {
     flush: () => void;
 };
 
-export function batch(
-    size: number,
-    level: "info" | "warn" | "error",
-): BatchLog {
+export function batch(max: number, level: "info" | "warn" | "error"): BatchLog {
     const batches: string[] = [];
     const add = (msg: string) => {
-        batches.push(msg);
+        if (batches.length >= max) {
+            return;
+        }
 
-        if (batches.length >= size) {
+        batches.push(msg);
+        if (batches.length >= max) {
             batchLog(batches, level);
         }
     };
