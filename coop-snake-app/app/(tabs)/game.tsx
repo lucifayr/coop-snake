@@ -74,8 +74,6 @@ export default function GameScreen() {
         const msgCallback = (e: any) => {
             const data = e?.data;
             if (data instanceof ArrayBuffer) {
-                const p = perfStart("parse msg");
-
                 msgWriteCanonicalBytes(new DataView(data));
                 const msg = binMsgFromBytes(msgView());
 
@@ -83,8 +81,6 @@ export default function GameScreen() {
                     const playerCoords = playerCoordsFromMsg(msg);
                     setCoords(playerCoords.player, playerCoords.coords);
                 }
-
-                p.end();
             }
         };
 
