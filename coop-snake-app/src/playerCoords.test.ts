@@ -16,7 +16,7 @@ describe("playerCoords", () => {
         const msg: GameBinaryMessage = {
             version: 1,
             messageType: "PlayerPosition",
-            dataLenght: data.byteLength,
+            dataLength: data.byteLength,
             data,
         };
 
@@ -43,7 +43,7 @@ describe("playerCoords", () => {
         const msg: GameBinaryMessage = {
             version: 1,
             messageType: "PlayerPosition",
-            dataLenght: data.byteLength,
+            dataLength: data.byteLength,
             data,
         };
 
@@ -70,7 +70,7 @@ describe("playerCoords", () => {
         const msg: GameBinaryMessage = {
             version: 1,
             messageType: "PlayerPosition",
-            dataLenght: data.byteLength,
+            dataLength: data.byteLength,
             data,
         };
 
@@ -87,8 +87,8 @@ describe("playerCoords", () => {
         );
         const msg: GameBinaryMessage = {
             version: 1,
-            messageType: "PlayerInput",
-            dataLenght: data.byteLength,
+            messageType: "PlayerSwipeInput",
+            dataLength: data.byteLength,
             data,
         };
 

@@ -21,7 +21,7 @@ describe("GameBinaryMessage", () => {
 
         expect(out.version).toEqual(1);
         expect(out.messageType).toEqual("PlayerInput");
-        expect(out.dataLenght).toEqual(8);
+        expect(out.dataLength).toEqual(8);
         expect(out.data.buffer).toEqual(
             Uint8Array.of(...[127, 0, 0, 1, 42, 65, 10, 24]).buffer,
         );

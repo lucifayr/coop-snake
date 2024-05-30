@@ -1,4 +1,3 @@
-import Button from "@/components/Button";
 import { Hidden } from "@/components/Game/Hidden";
 import { Snake, SnakeProperties } from "@/components/Game/Snake";
 import { GameLoop } from "@/src/gameLoop";
@@ -7,23 +6,26 @@ import { Player } from "@/src/binary/player";
 import { DEBUG_COORDS } from "@/src/debug/data";
 import { AntDesign } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { ReactElement, useEffect, useRef, useState } from "react";
-import {
-    Alert,
-    Pressable,
-    StatusBar,
-    StyleSheet,
-    Text,
-    View,
-} from "react-native";
+import { ReactElement, ReactNode, useEffect, useRef } from "react";
+import { Pressable, StatusBar, StyleSheet, Text, View } from "react-native";
 import { GameEngine } from "react-native-game-engine";
 import { playerCoordsFromMsg } from "@/src/playerCoords";
-import { binMsgFromBytes } from "@/src/binary/gameBinaryMessage";
+import {
+    binMsgFromBytes,
+    binMsgIntoBytes,
+} from "@/src/binary/gameBinaryMessage";
 import { GameCanvas } from "@/components/Game/GameCanvas";
 import { useBuffer } from "@/src/binary/useBuffer";
 import { GAME_CONSTANTS } from "@/src/gameConstants";
-import { perfStart } from "@/src/logging";
+import {
+    Gesture,
+    Directions,
+    GestureDetector,
+    GestureHandlerRootView,
+    ComposedGesture,
+} from "react-native-gesture-handler";
 import { setCoords } from "@/src/stores/coordinateStore";
+import { swipeInputMsg } from "@/src/binary/swipe";
 
 export type GameEntities = {
     player1: {
@@ -46,9 +48,9 @@ export type GameEntities = {
 };
 
 export default function GameScreen() {
-    const [running, setRunning] = useState(true);
-    const [gameKey, setGameKey] = useState(0);
-    const engine = useRef<any>(null);
+    const isDebugActive = process.env.EXPO_PUBLIC_DEBUG === "true";
+
+    const socket = useRef<WebSocket | undefined>(undefined);
 
     const { view: msgView, writeCanonicalBytes: msgWriteCanonicalBytes } =
         useBuffer(
@@ -58,56 +60,88 @@ export default function GameScreen() {
                 16,
         );
 
-    const isDebugActive = process.env.EXPO_PUBLIC_DEBUG === "true";
-
     useEffect(() => {
         if (isDebugActive) {
             return;
         }
 
         const url = `${process.env.EXPO_PUBLIC_WEBSOCKET_BASE_URL}/game/tmp`;
-        const socket = new WebSocket(url);
+        const ws = new WebSocket(url);
 
         const errCallback = (e: any) => {
-            console.error(e);
+            console.error(`WebSocket error: ${e}`);
         };
+
         const msgCallback = (e: any) => {
             const data = e?.data;
-            if (data instanceof ArrayBuffer) {
-                msgWriteCanonicalBytes(new DataView(data));
-                const msg = binMsgFromBytes(msgView());
+            const isBinary = data instanceof ArrayBuffer;
+            if (!isBinary) {
+                return;
+            }
 
-                if (msg.messageType === "PlayerPosition") {
-                    const playerCoords = playerCoordsFromMsg(msg);
-                    setCoords(playerCoords.player, playerCoords.coords);
-                }
+            msgWriteCanonicalBytes(new DataView(data));
+            const msg = binMsgFromBytes(msgView());
+
+            if (msg.messageType === "PlayerPosition") {
+                const playerCoords = playerCoordsFromMsg(msg);
+                setCoords(playerCoords.player, playerCoords.coords);
             }
         };
 
-        socket.addEventListener("message", msgCallback);
-        socket.addEventListener("error", errCallback);
+        ws.addEventListener("message", msgCallback);
+        ws.addEventListener("error", errCallback);
+
+        socket.current = ws;
 
         return () => {
-            socket.removeEventListener("message", msgCallback);
-            socket.removeEventListener("error", errCallback);
-            socket.close();
+            ws.removeEventListener("message", msgCallback);
+            ws.removeEventListener("error", errCallback);
+            ws.close();
         };
     }, [isDebugActive, msgView, msgWriteCanonicalBytes]);
 
-    const restartGame = () => {
-        setGameKey((prevKey) => prevKey + 1);
-        setRunning(true);
-    };
+    return (
+        <GameScreenContainer>
+            <GestureDetector
+                gesture={swipeGestures({
+                    up: () => {
+                        const msg = swipeInputMsg("up", 0);
+                        socket.current?.send(binMsgIntoBytes(msg));
+                    },
+                    right: () => {
+                        const msg = swipeInputMsg("right", 0);
+                        socket.current?.send(binMsgIntoBytes(msg));
+                    },
+                    down: () => {
+                        const msg = swipeInputMsg("down", 0);
+                        socket.current?.send(binMsgIntoBytes(msg));
+                    },
+                    left: () => {
+                        const msg = swipeInputMsg("left", 0);
+                        socket.current?.send(binMsgIntoBytes(msg));
+                    },
+                })}
+            >
+                <GameEngine
+                    renderer={GameCanvas}
+                    systems={[GameLoop]}
+                    entities={initialEntities(isDebugActive)}
+                    running={true}
+                >
+                    <StatusBar hidden={true} />
+                </GameEngine>
+            </GestureDetector>
+        </GameScreenContainer>
+    );
+}
 
-    const onEvent = (e: any) => {
-        if (e.type === "game-over") {
-            setRunning(false);
-            Alert.alert("Game Over");
-        }
-    };
-
+function GameScreenContainer({ children }: { children: ReactNode }) {
     return (
         <View style={styles.container}>
+            <View style={styles.gamepane}>
+                <GestureHandlerRootView>{children}</GestureHandlerRootView>
+            </View>
+
             <Pressable
                 style={{
                     display: "flex",
@@ -121,51 +155,62 @@ export default function GameScreen() {
                 <AntDesign name="caretleft" size={24} color="white" />
                 <Text style={{ color: "white", fontSize: 20 }}>Back</Text>
             </Pressable>
-
-            <StatusBar backgroundColor="#EBAB9D" />
-
-            <GameEngine
-                renderer={GameCanvas}
-                systems={[GameLoop]}
-                style={styles.gamepane}
-                ref={engine}
-                key={gameKey}
-                entities={
-                    {
-                        player1: {
-                            playerId: "Player1",
-                            coords: [],
-                            renderer: Snake,
-                        },
-                        player2: {
-                            playerId: "Player2",
-                            coords: [],
-                            renderer: Snake,
-                        },
-                        // TODO: massive HACK, please fix asap
-                        debug: {
-                            data: isDebugActive
-                                ? {
-                                      rawCoords: DEBUG_COORDS,
-                                      rawCoordsOffset: 0,
-                                  }
-                                : undefined,
-                            renderer: <Hidden />,
-                        },
-                    } satisfies GameEntities
-                }
-                running={running}
-                onEvent={onEvent}
-            >
-                <StatusBar hidden={true} />
-            </GameEngine>
-
-            <Button
-                disabled={running}
-                onClick={() => restartGame()}
-                text="Restart"
-            />
         </View>
+    );
+}
+
+function initialEntities(isDebug: boolean): GameEntities {
+    return {
+        player1: {
+            playerId: "Player1",
+            coords: [],
+            renderer: Snake,
+        },
+        player2: {
+            playerId: "Player2",
+            coords: [],
+            renderer: Snake,
+        },
+        // TODO: massive HACK, please fix asap
+        debug: {
+            data: isDebug
+                ? {
+                      rawCoords: DEBUG_COORDS,
+                      rawCoordsOffset: 0,
+                  }
+                : undefined,
+            renderer: <Hidden />,
+        },
+    };
+}
+
+function swipeGestures(callbacks: {
+    up: () => void;
+    right: () => void;
+    down: () => void;
+    left: () => void;
+}): ComposedGesture {
+    const gestureSwipeUp = Gesture.Fling();
+    gestureSwipeUp.config.direction = Directions.UP;
+    gestureSwipeUp.onEnd(callbacks.up);
+
+    const gestureSwipeRight = Gesture.Fling();
+    gestureSwipeRight.config.direction = Directions.RIGHT;
+    gestureSwipeRight.onEnd(callbacks.right);
+
+    const gestureSwipeDown = Gesture.Fling();
+    gestureSwipeDown.config.direction = Directions.DOWN;
+    gestureSwipeDown.onEnd(callbacks.down);
+
+    const gestureSwipeLeft = Gesture.Fling();
+    gestureSwipeLeft.config.direction = Directions.LEFT;
+    gestureSwipeLeft.onEnd(callbacks.left);
+
+    return Gesture.Race(
+        gestureSwipeUp,
+        gestureSwipeRight,
+        gestureSwipeDown,
+        gestureSwipeLeft,
     );
 }
 

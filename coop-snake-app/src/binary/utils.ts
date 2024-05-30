@@ -6,6 +6,15 @@ export function viewSlice(
     return new DataView(view.buffer, offset + view.byteOffset, len);
 }
 
+export function copyDataView(view: DataView): Uint8Array {
+    const buf = new Uint8Array(view.byteLength);
+    for (let i = 0; i < view.byteLength; i++) {
+        buf[i] = view.getUint8(i);
+    }
+
+    return buf;
+}
+
 export function u32ToBytes(value: number): Uint8Array {
     const buf = new Uint8Array(4);
 

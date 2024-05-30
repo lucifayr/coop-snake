@@ -1,10 +1,15 @@
 import { assert } from "../assert";
-import { GameMessageType, msgTypeFromU32 } from "./gameMessageTypes";
+import {
+    GameMessageType,
+    msgTypeFromU32,
+    msgTypeIntoBytes,
+} from "./gameMessageTypes";
+import { copyDataView, u32ToBytes } from "./utils";
 
 export type GameBinaryMessage = {
     version: number;
     messageType: GameMessageType;
-    dataLenght: number;
+    dataLength: number;
     data: DataView;
 };
 
@@ -13,6 +18,17 @@ export const MESSAGE_VERSION = 1;
 const MESSAGE_HEADER_WIDTH_VERSION = 1;
 const MESSAGE_HEADER_WIDTH_TYPE = 4;
 const MESSAGE_HEADER_WIDTH_DATA_LENGTH = 4;
+
+export function binMsgIntoBytes(msg: GameBinaryMessage): Uint8Array {
+    return Uint8Array.of(
+        ...[
+            msg.version,
+            ...msgTypeIntoBytes(msg.messageType),
+            ...u32ToBytes(msg.dataLength),
+            ...copyDataView(msg.data),
+        ],
+    );
+}
 
 export function binMsgFromBytes(bytes: DataView): GameBinaryMessage {
     const version = bytes.getUint8(0);
@@ -41,6 +57,6 @@ export function binMsgFromBytes(bytes: DataView): GameBinaryMessage {
         version,
         data,
         messageType: type,
-        dataLenght: len,
+        dataLength: len,
     };
 }
