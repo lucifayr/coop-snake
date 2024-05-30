@@ -26,6 +26,7 @@ import {
 } from "react-native-gesture-handler";
 import { getTickN, setCoords, setTickN } from "@/src/stores/globalStore";
 import { swipeInputMsg } from "@/src/binary/swipe";
+import { parsePlainTextMsg } from "@/src/plainTextMsg";
 
 export type GameEntities = {
     player1: {
@@ -51,7 +52,7 @@ export default function GameScreen() {
     const isDebugActive = process.env.EXPO_PUBLIC_DEBUG === "true";
 
     const socket = useRef<WebSocket | undefined>(undefined);
-
+    const token = useRef<number | undefined>(undefined);
     const { view: msgView, writeCanonicalBytes: msgWriteCanonicalBytes } =
         useBuffer(
             GAME_CONSTANTS.GRID_SIZE *
@@ -68,17 +69,22 @@ export default function GameScreen() {
         const url = `${process.env.EXPO_PUBLIC_WEBSOCKET_BASE_URL}/game/tmp`;
         const ws = new WebSocket(url);
 
-        const errCallback = (e: any) => {
-            console.error(`WebSocket error: ${e}`);
+        const onErr = (e: WebSocketMessageEvent) => {
+            console.error("WebSocket error:", e);
         };
 
-        const msgCallback = (e: any) => {
-            const data = e?.data;
+        const onMsg = (e: WebSocketMessageEvent) => {
+            const data = e.data;
             const isBinary = data instanceof ArrayBuffer;
-            if (!isBinary) {
-                return;
-            }
 
+            if (isBinary) {
+                onBinMsg(data);
+            } else if (typeof data === "string") {
+                onPlainMsg(data);
+            }
+        };
+
+        const onBinMsg = (data: ArrayBuffer) => {
             msgWriteCanonicalBytes(new DataView(data));
             const msg = binMsgFromBytes(msgView());
 
@@ -89,14 +95,31 @@ export default function GameScreen() {
             }
         };
 
-        ws.addEventListener("message", msgCallback);
-        ws.addEventListener("error", errCallback);
+        const onPlainMsg = (data: string) => {
+            const msg = parsePlainTextMsg(data);
+            if (msg.type === "player-token") {
+                console.log(msg);
+                token.current = parseInt(msg.token);
+            }
+            if (msg.type === "session-key") {
+                console.log("session key:", msg.key);
+            }
+            if (msg.type === "unknown") {
+                console.warn(
+                    "Received plain text message of unknown type",
+                    msg,
+                );
+            }
+        };
+
+        ws.addEventListener("message", onMsg);
+        ws.addEventListener("error", onErr);
 
         socket.current = ws;
 
         return () => {
-            ws.removeEventListener("message", msgCallback);
-            ws.removeEventListener("error", errCallback);
+            ws.removeEventListener("message", onMsg);
+            ws.removeEventListener("error", onErr);
             ws.close();
         };
     }, [isDebugActive, msgView, msgWriteCanonicalBytes]);
@@ -106,19 +129,35 @@ export default function GameScreen() {
             <GestureDetector
                 gesture={swipeGestures({
                     up: () => {
-                        const msg = swipeInputMsg("up", getTickN());
+                        const msg = swipeInputMsg(
+                            "up",
+                            getTickN(),
+                            token.current,
+                        );
                         socket.current?.send(binMsgIntoBytes(msg));
                     },
                     right: () => {
-                        const msg = swipeInputMsg("right", getTickN());
+                        const msg = swipeInputMsg(
+                            "right",
+                            getTickN(),
+                            token.current,
+                        );
                         socket.current?.send(binMsgIntoBytes(msg));
                     },
                     down: () => {
-                        const msg = swipeInputMsg("down", getTickN());
+                        const msg = swipeInputMsg(
+                            "down",
+                            getTickN(),
+                            token.current,
+                        );
                         socket.current?.send(binMsgIntoBytes(msg));
                     },
                     left: () => {
-                        const msg = swipeInputMsg("left", getTickN());
+                        const msg = swipeInputMsg(
+                            "left",
+                            getTickN(),
+                            token.current,
+                        );
                         socket.current?.send(binMsgIntoBytes(msg));
                     },
                 })}
