@@ -10,6 +10,7 @@ import { viewSlice } from "./binary/utils";
 
 export type PlayerCoordinates = {
     player: Player;
+    tickN: number;
     coords: Coordinate[];
 };
 
@@ -20,15 +21,13 @@ export function playerCoordsFromMsg(msg: GameBinaryMessage): PlayerCoordinates {
     );
 
     const player = playerFromU8(msg.data.getUint8(0));
+    const tickN = msg.data.getUint32(PLAYER_BYTE_WIDTH);
+    const dataOffset = PLAYER_BYTE_WIDTH + 4;
     const coords = coordsArrayFromBytes(
-        viewSlice(
-            msg.data,
-            PLAYER_BYTE_WIDTH,
-            msg.data.byteLength - PLAYER_BYTE_WIDTH,
-        ),
+        viewSlice(msg.data, dataOffset, msg.data.byteLength - dataOffset),
     );
 
     validateCoords(coords);
 
-    return { player, coords };
+    return { player, tickN, coords };
 }

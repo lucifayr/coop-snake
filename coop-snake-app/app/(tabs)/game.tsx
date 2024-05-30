@@ -24,7 +24,7 @@ import {
     GestureHandlerRootView,
     ComposedGesture,
 } from "react-native-gesture-handler";
-import { setCoords } from "@/src/stores/coordinateStore";
+import { getTickN, setCoords, setTickN } from "@/src/stores/globalStore";
 import { swipeInputMsg } from "@/src/binary/swipe";
 
 export type GameEntities = {
@@ -84,6 +84,7 @@ export default function GameScreen() {
 
             if (msg.messageType === "PlayerPosition") {
                 const playerCoords = playerCoordsFromMsg(msg);
+                setTickN(playerCoords.tickN);
                 setCoords(playerCoords.player, playerCoords.coords);
             }
         };
@@ -105,19 +106,19 @@ export default function GameScreen() {
             <GestureDetector
                 gesture={swipeGestures({
                     up: () => {
-                        const msg = swipeInputMsg("up", 0);
+                        const msg = swipeInputMsg("up", getTickN());
                         socket.current?.send(binMsgIntoBytes(msg));
                     },
                     right: () => {
-                        const msg = swipeInputMsg("right", 0);
+                        const msg = swipeInputMsg("right", getTickN());
                         socket.current?.send(binMsgIntoBytes(msg));
                     },
                     down: () => {
-                        const msg = swipeInputMsg("down", 0);
+                        const msg = swipeInputMsg("down", getTickN());
                         socket.current?.send(binMsgIntoBytes(msg));
                     },
                     left: () => {
-                        const msg = swipeInputMsg("left", 0);
+                        const msg = swipeInputMsg("left", getTickN());
                         socket.current?.send(binMsgIntoBytes(msg));
                     },
                 })}

@@ -12,9 +12,9 @@ export type SwipeInputKind = keyof typeof SWIPE_INPUT_BYTES;
 
 export function swipeInputMsg(
     kind: SwipeInputKind,
-    frameTimestamp: number,
+    tickN: number,
 ): GameBinaryMessage {
-    const data = new DataView(swipeInputMsgData(kind, frameTimestamp).buffer);
+    const data = new DataView(swipeInputMsgData(kind, tickN).buffer);
     return {
         version: MESSAGE_VERSION,
         messageType: "PlayerSwipeInput",
@@ -23,10 +23,7 @@ export function swipeInputMsg(
     };
 }
 
-function swipeInputMsgData(
-    kind: SwipeInputKind,
-    frameTimestamp: number,
-): Uint8Array {
-    const frameTimestampBytes = u32ToBytes(frameTimestamp);
-    return Uint8Array.of(...[SWIPE_INPUT_BYTES[kind], ...frameTimestampBytes]);
+function swipeInputMsgData(kind: SwipeInputKind, tickN: number): Uint8Array {
+    const tickNBytes = u32ToBytes(tickN);
+    return Uint8Array.of(...[SWIPE_INPUT_BYTES[kind], ...tickNBytes]);
 }

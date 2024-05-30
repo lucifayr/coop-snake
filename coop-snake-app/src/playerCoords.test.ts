@@ -8,6 +8,8 @@ describe("playerCoords", () => {
                 ...[
                     // Player Identifier
                     1,
+                    // Tick Number
+                    0, 0, 0, 0,
                     // Coordinate Point 1
                     0, 0, 0, 42, 0, 0, 0, 24,
                 ],
@@ -31,6 +33,8 @@ describe("playerCoords", () => {
                 ...[
                     // Player Identifier
                     1,
+                    // Tick Number
+                    0, 0, 0, 0,
                     // Coordinate Point 1
                     0, 0, 1, 42, 0, 0, 0, 24,
                     // Coordinate Point 2
@@ -62,6 +66,8 @@ describe("playerCoords", () => {
                 ...[
                     // Player Identifier
                     1,
+                    // Tick Number
+                    0, 0, 0, 0,
                     // Coordinate Point 1
                     0, 0, 0, 42, 0,
                 ],

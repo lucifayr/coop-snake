@@ -1,7 +1,7 @@
 import { GameEntities } from "@/app/(tabs)/game";
 import { dbgNextCoords } from "./debug/helpers";
 import { coordsArrayFromBytes, validateCoords } from "./binary/coordinate";
-import { getCoords } from "./stores/coordinateStore";
+import { getCoords } from "./stores/globalStore";
 
 export const randomBetween = (min: number, max: number): number => {
     return Math.floor(Math.random() * (max - min + 1) + min);
