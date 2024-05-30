@@ -21,6 +21,7 @@ import { playerCoordsFromMsg } from "@/src/playerCoords";
 import { binMsgFromBytes } from "@/src/binary/gameBinaryMessage";
 import { useCoordinateStore } from "@/src/stores/coordinateStore";
 import { perfStart } from "@/src/logging";
+import { GameCanvas } from "@/components/Game/GameCanvas";
 
 export type GameEntities = {
     player1: {
@@ -121,10 +122,11 @@ export default function GameScreen() {
             <StatusBar backgroundColor="#EBAB9D" />
 
             <GameEngine
-                ref={engine}
-                style={styles.gamepane}
-                key={gameKey}
+                renderer={GameCanvas}
                 systems={[GameLoop]}
+                style={styles.gamepane}
+                ref={engine}
+                key={gameKey}
                 entities={
                     {
                         player1: {
@@ -180,10 +182,6 @@ const styles = StyleSheet.create({
         borderStyle: "solid",
         borderWidth: 2,
         borderRadius: 10,
-        shadowColor: "#000",
-        shadowOpacity: 0.3,
-        shadowRadius: 14,
-        shadowOffset: { width: 0, height: 0 },
     },
     title: {
         fontSize: 20,

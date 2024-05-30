@@ -1,14 +1,15 @@
 import { assert } from "@/src/assert";
 import { Coordinate } from "@/src/binary/coordinate";
+import { Group, Rect } from "@shopify/react-native-skia";
 import { PLAYERS, Player } from "@/src/binary/player";
-import { perfStart } from "@/src/logging";
-import { pixelPosToSizeIndependent, snakeSegemntSize } from "@/src/scaling";
+import { gridPosToPixels, snakeSegemntSize } from "@/src/scaling";
 import { Component } from "react";
-import { View, StyleSheet } from "react-native";
+import { StyleSheet } from "react-native";
 
 export type SnakeProperties = {
     playerId: Player;
     coords: Coordinate[];
+    layout: { width: number };
 };
 
 export class Snake extends Component<SnakeProperties> {
@@ -26,32 +27,26 @@ export class Snake extends Component<SnakeProperties> {
     }
 
     render() {
+        const canvasWidth = this.props.layout.width;
         const segments = this.props.coords.map((coord, idx) => {
-            const xPosPercentage = pixelPosToSizeIndependent(coord.x);
-            const yPosPercentage = pixelPosToSizeIndependent(coord.y);
+            const xPosPercentage = gridPosToPixels(coord.x, canvasWidth);
+            const yPosPercentage = gridPosToPixels(coord.y, canvasWidth);
 
-            const size = snakeSegemntSize();
+            const size = snakeSegemntSize(canvasWidth);
+            const color = playerColor(this.props.playerId, idx === 0);
             return (
-                <View
+                <Rect
                     key={idx}
-                    style={[
-                        styles.segment,
-                        {
-                            left: `${xPosPercentage}%`,
-                            top: `${yPosPercentage}%`,
-                            height: `${size}%`,
-                            width: `${size}%`,
-                            backgroundColor: playerColor(
-                                this.props.playerId,
-                                idx === 0,
-                            ),
-                        },
-                    ]}
+                    color={color}
+                    width={size}
+                    height={size}
+                    x={xPosPercentage}
+                    y={yPosPercentage}
                 />
             );
         });
 
-        return <View style={styles.snake}>{segments}</View>;
+        return <Group>{segments}</Group>;
     }
 }
 
