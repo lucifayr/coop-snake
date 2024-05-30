@@ -1,6 +1,7 @@
 import { assert } from "@/src/assert";
 import { Coordinate } from "@/src/binary/coordinate";
 import { PLAYERS, Player } from "@/src/binary/player";
+import { perfStart } from "@/src/logging";
 import { pixelPosToSizeIndependent, snakeSegemntSize } from "@/src/scaling";
 import { Component } from "react";
 import { View, StyleSheet } from "react-native";

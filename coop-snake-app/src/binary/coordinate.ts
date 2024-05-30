@@ -1,4 +1,5 @@
 import { assert } from "../assert";
+import { batch } from "../logging";
 import { bytesToUint32 } from "./utils";
 
 export type Coordinate = {
@@ -36,19 +37,18 @@ export function coordsArrayFromBytes(bytes: Uint8Array): Coordinate[] {
 }
 
 export function validateCoords(coords: Coordinate[]) {
-    let warnCount = 0;
+    const batchLogger = batch(10, "warn");
+
     for (let i = 1; i < coords.length; i++) {
         const current = coords[i];
         const prev = coords[i - 1];
 
         const isDuplicate = current.x === prev.x && current.y === prev.y;
         if (isDuplicate) {
-            console.warn(
-                "INVALID COORINATE LIST: duplicate coordinate.",
-                "pos 1",
-                prev,
-                "pos 2",
-                current,
+            batchLogger.add(
+                `INVALID COORINATE LIST: duplicate coordinate.
+pos1 ${JSON.stringify(prev)}
+pos2 ${JSON.stringify(current)}`,
             );
         }
 
@@ -57,22 +57,13 @@ export function validateCoords(coords: Coordinate[]) {
         const isDiscontinues = Math.abs(dx) > 1 || Math.abs(dy) > 1;
 
         if (isDiscontinues) {
-            console.warn(
-                "INVALID COORINATE LIST: coordinates are discontinues.",
-                "pos 1",
-                prev,
-                "pos 2",
-                current,
+            batchLogger.add(
+                `INVALID COORINATE LIST: coordinates are discontinues.
+pos1 ${JSON.stringify(prev)}
+pos2 ${JSON.stringify(current)}`,
             );
         }
-
-        if (isDiscontinues || isDuplicate) {
-            warnCount++;
-        }
-
-        if (warnCount > 3) {
-            console.log("INVALID COORINATE LIST: Hidding additional errors.");
-            break;
-        }
     }
+
+    batchLogger.flush();
 }
