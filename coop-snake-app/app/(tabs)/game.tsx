@@ -119,77 +119,85 @@ export default function GameScreen() {
     }, [isDebugActive, msgView, msgWriteCanonicalBytes]);
 
     return (
-        <GameScreenContainer>
-            <GestureDetector
-                gesture={swipeGestures({
-                    up: () => {
-                        const msg = swipeInputMsg(
-                            "up",
-                            global.getTickN(),
-                            token.current,
-                        );
-                        socket.current?.send(binMsgIntoBytes(msg));
-                    },
-                    right: () => {
-                        const msg = swipeInputMsg(
-                            "right",
-                            global.getTickN(),
-                            token.current,
-                        );
-                        socket.current?.send(binMsgIntoBytes(msg));
-                    },
-                    down: () => {
-                        const msg = swipeInputMsg(
-                            "down",
-                            global.getTickN(),
-                            token.current,
-                        );
-                        socket.current?.send(binMsgIntoBytes(msg));
-                    },
-                    left: () => {
-                        const msg = swipeInputMsg(
-                            "left",
-                            global.getTickN(),
-                            token.current,
-                        );
-                        socket.current?.send(binMsgIntoBytes(msg));
-                    },
-                })}
+        <GameScreenContainer
+            onSwipe={swipeGestures({
+                up: () => {
+                    const msg = swipeInputMsg(
+                        "up",
+                        global.getTickN(),
+                        token.current,
+                    );
+                    socket.current?.send(binMsgIntoBytes(msg));
+                },
+                right: () => {
+                    const msg = swipeInputMsg(
+                        "right",
+                        global.getTickN(),
+                        token.current,
+                    );
+                    socket.current?.send(binMsgIntoBytes(msg));
+                },
+                down: () => {
+                    const msg = swipeInputMsg(
+                        "down",
+                        global.getTickN(),
+                        token.current,
+                    );
+                    socket.current?.send(binMsgIntoBytes(msg));
+                },
+                left: () => {
+                    const msg = swipeInputMsg(
+                        "left",
+                        global.getTickN(),
+                        token.current,
+                    );
+                    socket.current?.send(binMsgIntoBytes(msg));
+                },
+            })}
+        >
+            <GameEngine
+                renderer={GameCanvas}
+                systems={[GameLoop]}
+                entities={initialEntities(isDebugActive)}
+                running={true}
             >
-                <GameEngine
-                    renderer={GameCanvas}
-                    systems={[GameLoop]}
-                    entities={initialEntities(isDebugActive)}
-                    running={true}
-                >
-                    <StatusBar hidden={true} />
-                </GameEngine>
-            </GestureDetector>
+                <StatusBar hidden={true} />
+            </GameEngine>
         </GameScreenContainer>
     );
 }
 
-function GameScreenContainer({ children }: { children: ReactNode }) {
+function GameScreenContainer({
+    children,
+    onSwipe,
+}: {
+    children: ReactNode;
+    onSwipe: ComposedGesture;
+}) {
     return (
-        <View style={styles.container}>
-            <View style={styles.gamepane}>
-                <GestureHandlerRootView>{children}</GestureHandlerRootView>
-            </View>
+        <GestureHandlerRootView>
+            <View style={styles.container}>
+                <GestureDetector gesture={onSwipe}>
+                    <View style={{ flexGrow: 1 }}>
+                        <View style={styles.gamepane}>{children}</View>
+                    </View>
+                </GestureDetector>
 
-            <Pressable
-                style={{
-                    display: "flex",
-                    flexWrap: "nowrap",
-                    flexDirection: "row",
-                    marginLeft: 40,
-                    width: "100%",
-                }}
-                onPress={() => router.navigate("/home")}
-            >
-                <AntDesign name="caretleft" size={24} color="white" />
-                <Text style={{ color: "white", fontSize: 20 }}>Back</Text>
-            </Pressable>
-        </View>
+                <Pressable
+                    style={{
+                        display: "flex",
+                        flexWrap: "nowrap",
+                        flexDirection: "row",
+                        marginLeft: 40,
+                        width: "100%",
+                    }}
+                    onPress={() => router.navigate("/home")}
+                >
+                    <AntDesign name="caretleft" size={24} color="white" />
+                    <Text style={{ color: "white", fontSize: 20 }}>Back</Text>
+                </Pressable>
+            </View>
+        </GestureHandlerRootView>
     );
 }
 
@@ -254,6 +262,9 @@ const styles = StyleSheet.create({
         backgroundColor: "#EBAB9D",
         justifyContent: "space-around",
         alignItems: "center",
+        // hacky spacing, feel free to change when adding more elements
+        gap: 12,
+        paddingVertical: 48,
     },
     gamepane: {
         width: "90%",
