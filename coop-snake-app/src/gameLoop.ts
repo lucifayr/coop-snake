@@ -1,15 +1,15 @@
 import { GameEntities } from "@/app/(tabs)/game";
 import { dbgNextCoords } from "./debug/helpers";
 import { coordsArrayFromBytes, validateCoords } from "./binary/coordinate";
-import { getCoords } from "./stores/globalStore";
+import { global } from "./stores/globalStore";
 
 export const randomBetween = (min: number, max: number): number => {
     return Math.floor(Math.random() * (max - min + 1) + min);
 };
 
 export const GameLoop = (entities: GameEntities): GameEntities => {
-    const coordsP1 = getCoords("Player1");
-    const coordsP2 = getCoords("Player2");
+    const coordsP1 = global.getCoords("Player1");
+    const coordsP2 = global.getCoords("Player2");
 
     if (entities.debug.data) {
         const [coordArrayBytes, offset] = dbgNextCoords(

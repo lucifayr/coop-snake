@@ -16,7 +16,6 @@ import {
 } from "@/src/binary/gameBinaryMessage";
 import { GameCanvas } from "@/components/Game/GameCanvas";
 import { useBuffer } from "@/src/binary/useBuffer";
-import { GAME_CONSTANTS } from "@/src/gameConstants";
 import {
     Gesture,
     Directions,
@@ -24,9 +23,9 @@ import {
     GestureHandlerRootView,
     ComposedGesture,
 } from "react-native-gesture-handler";
-import { getTickN, setCoords, setTickN } from "@/src/stores/globalStore";
+import { global } from "@/src/stores/globalStore";
 import { swipeInputMsg } from "@/src/binary/swipe";
-import { parsePlainTextMsg } from "@/src/plainTextMsg";
+import { SessionInfo, parseSessionInfoMsg } from "@/src/binary/sessionInfo";
 
 export type GameEntities = {
     player1: {
@@ -55,8 +54,8 @@ export default function GameScreen() {
     const token = useRef<number | undefined>(undefined);
     const { view: msgView, writeCanonicalBytes: msgWriteCanonicalBytes } =
         useBuffer(
-            GAME_CONSTANTS.GRID_SIZE *
-                GAME_CONSTANTS.GRID_SIZE *
+            global.getBoardSize() *
+                global.getBoardSize() *
                 COORDINATE_BYTE_WIDTH *
                 16,
         );
@@ -76,11 +75,8 @@ export default function GameScreen() {
         const onMsg = (e: WebSocketMessageEvent) => {
             const data = e.data;
             const isBinary = data instanceof ArrayBuffer;
-
             if (isBinary) {
                 onBinMsg(data);
-            } else if (typeof data === "string") {
-                onPlainMsg(data);
             }
         };
 
@@ -88,26 +84,25 @@ export default function GameScreen() {
             msgWriteCanonicalBytes(new DataView(data));
             const msg = binMsgFromBytes(msgView());
 
+            if (msg.messageType === "SessionInfo") {
+                const info = parseSessionInfoMsg(msg.data);
+                onSessionInfo(info);
+            }
+
             if (msg.messageType === "PlayerPosition") {
                 const playerCoords = playerCoordsFromMsg(msg);
-                setTickN(playerCoords.tickN);
-                setCoords(playerCoords.player, playerCoords.coords);
+                global.setTickN(playerCoords.tickN);
+                global.setCoords(playerCoords.player, playerCoords.coords);
             }
         };
 
-        const onPlainMsg = (data: string) => {
-            const msg = parsePlainTextMsg(data);
-            if (msg.type === "player-token") {
-                token.current = parseInt(msg.token);
+        const onSessionInfo = (info: SessionInfo) => {
+            if (info.type === "PlayerToken") {
+                token.current = info.value;
             }
-            if (msg.type === "session-key") {
-                console.log("session key:", msg.key);
-            }
-            if (msg.type === "unknown") {
-                console.warn(
-                    "Received plain text message of unknown type",
-                    msg,
-                );
+
+            if (info.type === "BoardSize") {
+                global.setBoardSize(info.value);
             }
         };
 
@@ -130,7 +125,7 @@ export default function GameScreen() {
                     up: () => {
                         const msg = swipeInputMsg(
                             "up",
-                            getTickN(),
+                            global.getTickN(),
                             token.current,
                         );
                         socket.current?.send(binMsgIntoBytes(msg));
@@ -138,7 +133,7 @@ export default function GameScreen() {
                     right: () => {
                         const msg = swipeInputMsg(
                             "right",
-                            getTickN(),
+                            global.getTickN(),
                             token.current,
                         );
                         socket.current?.send(binMsgIntoBytes(msg));
@@ -146,7 +141,7 @@ export default function GameScreen() {
                     down: () => {
                         const msg = swipeInputMsg(
                             "down",
-                            getTickN(),
+                            global.getTickN(),
                             token.current,
                         );
                         socket.current?.send(binMsgIntoBytes(msg));
@@ -154,7 +149,7 @@ export default function GameScreen() {
                     left: () => {
                         const msg = swipeInputMsg(
                             "left",
-                            getTickN(),
+                            global.getTickN(),
                             token.current,
                         );
                         socket.current?.send(binMsgIntoBytes(msg));

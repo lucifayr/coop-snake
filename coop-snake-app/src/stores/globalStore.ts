@@ -7,20 +7,38 @@ const store = {
         Player2: [] as Coordinate[],
     },
     tickN: 0,
+    boardSize: 32,
 };
 
-export function getCoords(player: Player): Coordinate[] {
+export const global = {
+    getCoords,
+    setCoords,
+    getTickN,
+    setTickN,
+    getBoardSize,
+    setBoardSize,
+} as const;
+
+function getCoords(player: Player): Coordinate[] {
     return store.coords[player];
 }
 
-export function setCoords(player: Player, coords: Coordinate[]) {
+function setCoords(player: Player, coords: Coordinate[]) {
     store.coords[player] = coords;
 }
 
-export function getTickN(): number {
+function getTickN(): number {
     return store.tickN;
 }
 
-export function setTickN(tickN: number) {
+function setTickN(tickN: number) {
     store.tickN = tickN;
+}
+
+function getBoardSize(): number {
+    return store.boardSize;
+}
+
+function setBoardSize(boardSize: number) {
+    store.boardSize = boardSize;
 }

@@ -1,5 +1,5 @@
-import { GAME_CONSTANTS } from "./gameConstants";
 import { assert } from "./assert";
+import { global } from "./stores/globalStore";
 
 /**
  * Converts pixel value to percentage of grid size;
@@ -7,13 +7,13 @@ import { assert } from "./assert";
  */
 export function gridPosToPixels(gridPos: number, canvasSize: number): number {
     assert(
-        gridPos < GAME_CONSTANTS.GRID_SIZE,
+        gridPos < global.getBoardSize(),
         `gridPos should be smaller than the size of the grid. Received ${gridPos}`,
     );
 
-    return (gridPos / GAME_CONSTANTS.GRID_SIZE) * canvasSize;
+    return (gridPos / global.getBoardSize()) * canvasSize;
 }
 
 export function snakeSegemntSize(canvasSize: number): number {
-    return (1 / GAME_CONSTANTS.GRID_SIZE) * canvasSize;
+    return (1 / global.getBoardSize()) * canvasSize;
 }
