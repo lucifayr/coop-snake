@@ -8,16 +8,15 @@ export type Player = keyof typeof PLAYERS;
 export const PLAYER_BYTE_WIDTH = 1;
 
 export function playerFromU8(byte: number): Player {
-    switch (byte) {
-        case 1:
-            return "Player1";
-        case 2:
-            return "Player2";
-        default:
-            throw new Error(
-                `Expected valid player identifier. Received ${byte}`,
-            );
+    for (const key in PLAYERS) {
+        const k = key as Player;
+        const v = new DataView(PLAYERS[k].buffer).getUint8(0);
+        if (v === byte) {
+            return k;
+        }
     }
+
+    throw new Error(`Expected valid player identifier. Received ${byte}`);
 }
 
 export function msgTypeIntoByte(type: Player): Uint8Array {

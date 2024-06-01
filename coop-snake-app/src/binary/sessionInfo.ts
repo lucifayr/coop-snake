@@ -8,17 +8,16 @@ const SESSION_INFO_TYPES = {
 
 type SessionInfoType = keyof typeof SESSION_INFO_TYPES;
 
-function infoTypeFromByte(byte: number): SessionInfoType | undefined {
-    switch (byte) {
-        case SESSION_INFO_TYPES["SessionKey"]:
-            return "SessionKey";
-        case SESSION_INFO_TYPES["PlayerToken"]:
-            return "PlayerToken";
-        case SESSION_INFO_TYPES["BoardSize"]:
-            return "BoardSize";
-        default:
-            return undefined;
+function infoTypeFromByte(byte: number): SessionInfoType {
+    for (const key in SESSION_INFO_TYPES) {
+        const k = key as SessionInfoType;
+        const v = SESSION_INFO_TYPES[k];
+        if (v === byte) {
+            return k;
+        }
     }
+
+    throw new Error(`Expected valid session info type type. Received ${byte}`);
 }
 
 export type SessionInfo = { type: SessionInfoType; value: number };
@@ -31,8 +30,6 @@ export function parseSessionInfoMsg(bytes: DataView): SessionInfo {
 
     const typeByte = bytes.getUint8(0);
     const type = infoTypeFromByte(typeByte);
-    assert(type !== undefined, `Received invalid type byte ${typeByte}`);
-
     const value = bytes.getUint32(1);
 
     return { value, type: type! };

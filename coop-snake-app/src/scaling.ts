@@ -14,6 +14,6 @@ export function gridPosToPixels(gridPos: number, canvasSize: number): number {
     return (gridPos / global.getBoardSize()) * canvasSize;
 }
 
-export function snakeSegemntSize(canvasSize: number): number {
+export function gridCellSize(canvasSize: number): number {
     return (1 / global.getBoardSize()) * canvasSize;
 }

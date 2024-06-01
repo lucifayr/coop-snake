@@ -26,6 +26,8 @@ import {
 import { global } from "@/src/stores/globalStore";
 import { swipeInputMsg } from "@/src/binary/swipe";
 import { SessionInfo, parseSessionInfoMsg } from "@/src/binary/sessionInfo";
+import { foodCoordFromMsg } from "@/src/foodCoords";
+import { Food, FoodProperties } from "@/components/Game/Food";
 
 export type GameEntities = {
     player1: {
@@ -37,6 +39,16 @@ export type GameEntities = {
         playerId: Player;
         coords: Coordinate[];
         renderer: React.ComponentType<SnakeProperties>;
+    };
+    food1: {
+        playerId: Player;
+        coord: Coordinate | undefined;
+        renderer: React.ComponentType<FoodProperties>;
+    };
+    food2: {
+        playerId: Player;
+        coord: Coordinate | undefined;
+        renderer: React.ComponentType<FoodProperties>;
     };
     debug: {
         data?: {
@@ -93,6 +105,11 @@ export default function GameScreen() {
                 const playerCoords = playerCoordsFromMsg(msg);
                 global.setTickN(playerCoords.tickN);
                 global.setCoords(playerCoords.player, playerCoords.coords);
+            }
+
+            if (msg.messageType === "FoodPosition") {
+                const foodCoord = foodCoordFromMsg(msg);
+                global.setFood(foodCoord.player, foodCoord.coord);
             }
         };
 
@@ -212,6 +229,16 @@ function initialEntities(isDebug: boolean): GameEntities {
             playerId: "Player2",
             coords: [],
             renderer: Snake,
+        },
+        food1: {
+            playerId: "Player1",
+            coord: undefined,
+            renderer: Food,
+        },
+        food2: {
+            playerId: "Player2",
+            coord: undefined,
+            renderer: Food,
         },
         // TODO: massive HACK, please fix asap
         debug: {
