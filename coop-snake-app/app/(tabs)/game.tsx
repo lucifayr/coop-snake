@@ -1,12 +1,10 @@
-import { Hidden } from "@/components/Game/Hidden";
 import { Snake, SnakeProperties } from "@/components/Game/Snake";
 import { GameLoop } from "@/src/gameLoop";
 import { COORDINATE_BYTE_WIDTH, Coordinate } from "@/src/binary/coordinate";
 import { Player } from "@/src/binary/player";
-import { DEBUG_COORDS } from "@/src/debug/data";
 import { AntDesign } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { ReactElement, ReactNode, useEffect, useRef } from "react";
+import { ReactNode, useEffect, useRef } from "react";
 import { Pressable, StatusBar, StyleSheet, Text, View } from "react-native";
 import { GameEngine } from "react-native-game-engine";
 import { playerCoordsFromMsg } from "@/src/playerCoords";
@@ -50,18 +48,9 @@ export type GameEntities = {
         coord: Coordinate | undefined;
         renderer: React.ComponentType<FoodProperties>;
     };
-    debug: {
-        data?: {
-            rawCoords: Uint8Array;
-            rawCoordsOffset: number;
-        };
-        renderer: ReactElement;
-    };
 };
 
 export default function GameScreen() {
-    const isDebugActive = process.env.EXPO_PUBLIC_DEBUG === "true";
-
     const socket = useRef<WebSocket | undefined>(undefined);
     const token = useRef<number | undefined>(undefined);
     const { view: msgView, writeCanonicalBytes: msgWriteCanonicalBytes } =
@@ -73,10 +62,6 @@ export default function GameScreen() {
         );
 
     useEffect(() => {
-        if (isDebugActive) {
-            return;
-        }
-
         const url = `${process.env.EXPO_PUBLIC_WEBSOCKET_BASE_URL}/game/tmp`;
         const ws = new WebSocket(url);
 
@@ -133,7 +118,7 @@ export default function GameScreen() {
             ws.removeEventListener("error", onErr);
             ws.close();
         };
-    }, [isDebugActive, msgView, msgWriteCanonicalBytes]);
+    }, [msgView, msgWriteCanonicalBytes]);
 
     return (
         <GameScreenContainer
@@ -175,7 +160,7 @@ export default function GameScreen() {
             <GameEngine
                 renderer={GameCanvas}
                 systems={[GameLoop]}
-                entities={initialEntities(isDebugActive)}
+                entities={initialEntities()}
                 running={true}
             >
                 <StatusBar hidden={true} />
@@ -218,7 +203,7 @@ function GameScreenContainer({
     );
 }
 
-function initialEntities(isDebug: boolean): GameEntities {
+function initialEntities(): GameEntities {
     return {
         player1: {
             playerId: "Player1",
@@ -239,16 +224,6 @@ function initialEntities(isDebug: boolean): GameEntities {
             playerId: "Player2",
             coord: undefined,
             renderer: Food,
-        },
-        // TODO: massive HACK, please fix asap
-        debug: {
-            data: isDebug
-                ? {
-                      rawCoords: DEBUG_COORDS,
-                      rawCoordsOffset: 0,
-                  }
-                : undefined,
-            renderer: <Hidden />,
         },
     };
 }

@@ -12,7 +12,15 @@ const store = {
         Player1: undefined as Coordinate | undefined,
         Player2: undefined as Coordinate | undefined,
     },
+    debug: {
+        flags: {
+            "show-grid-lines":
+                process.env.EXPO_PUBLIC_DEBUG_GRID_LINES === "true",
+        } satisfies { [key in DebugFlag]?: boolean },
+    },
 };
+
+type DebugFlag = "show-grid-lines";
 
 export const global = {
     getTickN,
@@ -23,6 +31,7 @@ export const global = {
     setCoords,
     getFood,
     setFood,
+    hasDebugFlag,
 } as const;
 
 function getTickN(): number {
@@ -54,4 +63,8 @@ function getFood(player: Player): Coordinate | undefined {
 
 function setFood(player: Player, coord: Coordinate) {
     store.food[player] = coord;
+}
+
+function hasDebugFlag(flag: DebugFlag): boolean {
+    return store.debug.flags[flag];
 }
