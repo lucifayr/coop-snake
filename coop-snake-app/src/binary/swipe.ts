@@ -16,7 +16,6 @@ export function swipeInputMsg(
     tickN: number,
     token: number | undefined,
 ): GameBinaryMessage {
-    console.log("client input", kind);
     assert(
         token !== undefined,
         "Received undefined token. Token needs to be to send input data.",
