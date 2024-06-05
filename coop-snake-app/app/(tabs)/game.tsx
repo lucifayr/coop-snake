@@ -5,7 +5,14 @@ import { Player } from "@/src/binary/player";
 import { AntDesign } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { ReactNode, useEffect, useRef } from "react";
-import { Pressable, StatusBar, StyleSheet, Text, View } from "react-native";
+import {
+    Alert,
+    Pressable,
+    StatusBar,
+    StyleSheet,
+    Text,
+    View,
+} from "react-native";
 import { GameEngine } from "react-native-game-engine";
 import { playerCoordsFromMsg } from "@/src/playerCoords";
 import {
@@ -21,7 +28,7 @@ import {
     GestureHandlerRootView,
     ComposedGesture,
 } from "react-native-gesture-handler";
-import { global } from "@/src/stores/globalStore";
+import { globalS } from "@/src/stores/globalStore";
 import { swipeInputMsg } from "@/src/binary/swipe";
 import { SessionInfo, parseSessionInfoMsg } from "@/src/binary/sessionInfo";
 import { foodCoordFromMsg } from "@/src/foodCoords";
@@ -55,8 +62,8 @@ export default function GameScreen() {
     const token = useRef<number | undefined>(undefined);
     const { view: msgView, writeCanonicalBytes: msgWriteCanonicalBytes } =
         useBuffer(
-            global.getBoardSize() *
-                global.getBoardSize() *
+            globalS.getBoardSize() *
+                globalS.getBoardSize() *
                 COORDINATE_BYTE_WIDTH *
                 16,
         );
@@ -88,13 +95,13 @@ export default function GameScreen() {
 
             if (msg.messageType === "PlayerPosition") {
                 const playerCoords = playerCoordsFromMsg(msg);
-                global.setTickN(playerCoords.tickN);
-                global.setCoords(playerCoords.player, playerCoords.coords);
+                globalS.setTickN(playerCoords.tickN);
+                globalS.setCoords(playerCoords.player, playerCoords.coords);
             }
 
             if (msg.messageType === "FoodPosition") {
                 const foodCoord = foodCoordFromMsg(msg);
-                global.setFood(foodCoord.player, foodCoord.coord);
+                globalS.setFood(foodCoord.player, foodCoord.coord);
             }
         };
 
@@ -104,7 +111,12 @@ export default function GameScreen() {
             }
 
             if (info.type === "BoardSize") {
-                global.setBoardSize(info.value);
+                globalS.setBoardSize(info.value);
+            }
+
+            if (info.type === "GameOver") {
+                globalS.setGameOver(info.cause);
+                Alert.alert(`Game Over : ${info.cause}`);
             }
         };
 
@@ -126,7 +138,7 @@ export default function GameScreen() {
                 up: () => {
                     const msg = swipeInputMsg(
                         "up",
-                        global.getTickN(),
+                        globalS.getTickN(),
                         token.current,
                     );
                     socket.current?.send(binMsgIntoBytes(msg));
@@ -134,7 +146,7 @@ export default function GameScreen() {
                 right: () => {
                     const msg = swipeInputMsg(
                         "right",
-                        global.getTickN(),
+                        globalS.getTickN(),
                         token.current,
                     );
                     socket.current?.send(binMsgIntoBytes(msg));
@@ -142,7 +154,7 @@ export default function GameScreen() {
                 down: () => {
                     const msg = swipeInputMsg(
                         "down",
-                        global.getTickN(),
+                        globalS.getTickN(),
                         token.current,
                     );
                     socket.current?.send(binMsgIntoBytes(msg));
@@ -150,7 +162,7 @@ export default function GameScreen() {
                 left: () => {
                     const msg = swipeInputMsg(
                         "left",
-                        global.getTickN(),
+                        globalS.getTickN(),
                         token.current,
                     );
                     socket.current?.send(binMsgIntoBytes(msg));

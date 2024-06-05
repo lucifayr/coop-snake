@@ -1,9 +1,14 @@
 import { Coordinate } from "../binary/coordinate";
 import { Player } from "../binary/player";
+import { GameOverCause } from "../binary/sessionInfo";
 
 const store = {
     tickN: 0,
     boardSize: 32,
+    gameState: {
+        gameOver: false,
+        gameOverCause: undefined as GameOverCause | undefined,
+    },
     coords: {
         Player1: [] as Coordinate[],
         Player2: [] as Coordinate[],
@@ -22,7 +27,7 @@ const store = {
 
 type DebugFlag = "show-grid-lines";
 
-export const global = {
+export const globalS = {
     getTickN,
     setTickN,
     getBoardSize,
@@ -32,6 +37,8 @@ export const global = {
     getFood,
     setFood,
     hasDebugFlag,
+    getGameOverInfo,
+    setGameOver,
 } as const;
 
 function getTickN(): number {
@@ -67,4 +74,19 @@ function setFood(player: Player, coord: Coordinate) {
 
 function hasDebugFlag(flag: DebugFlag): boolean {
     return store.debug.flags[flag];
+}
+
+function getGameOverInfo():
+    | { gameOver: false }
+    | { gameOver: true; cause: GameOverCause } {
+    if (store.gameState.gameOver) {
+        return { gameOver: true, cause: store.gameState.gameOverCause! };
+    }
+
+    return { gameOver: false };
+}
+
+function setGameOver(cause: GameOverCause) {
+    store.gameState.gameOver = true;
+    store.gameState.gameOverCause = cause;
 }

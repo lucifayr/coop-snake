@@ -1,10 +1,10 @@
 import { assert } from "../assert";
 import {
+    GAME_MESSAGE_TYPE_BYTES,
     GameMessageType,
-    msgTypeFromU32,
     msgTypeIntoBytes,
 } from "./gameMessageTypes";
-import { copyDataView, u32ToBytes } from "./utils";
+import { constKeyFromValueMap, copyDataView, u32ToBytes } from "./utils";
 
 export type GameBinaryMessage = {
     version: number;
@@ -39,7 +39,7 @@ export function binMsgFromBytes(bytes: DataView): GameBinaryMessage {
 
     const typeStartIdx = MESSAGE_HEADER_WIDTH_VERSION;
     const typeInt = bytes.getUint32(typeStartIdx);
-    const type = msgTypeFromU32(typeInt);
+    const type = constKeyFromValueMap(typeInt, GAME_MESSAGE_TYPE_BYTES);
 
     const lenStartIdx = typeStartIdx + MESSAGE_HEADER_WIDTH_TYPE;
     const len = bytes.getUint32(lenStartIdx);

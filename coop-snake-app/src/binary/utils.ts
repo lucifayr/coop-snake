@@ -25,3 +25,20 @@ export function u32ToBytes(value: number): Uint8Array {
 
     return buf;
 }
+
+export function constKeyFromValueMap<O extends { [key: string]: number }>(
+    value: number,
+    obj: O,
+): keyof O {
+    for (const key in obj) {
+        const k = key as keyof O;
+        const v = obj[k];
+        if (v === value) {
+            return k;
+        }
+    }
+
+    throw new Error(
+        `Expected valid value in object ${JSON.stringify(obj)}. Received ${value}`,
+    );
+}
