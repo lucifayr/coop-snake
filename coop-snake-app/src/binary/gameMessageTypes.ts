@@ -1,24 +1,14 @@
+import { u32ToBytes } from "./utils";
+
 export const GAME_MESSAGE_TYPE_BYTES = {
-    PlayerPosition: Uint8Array.of(...[0, 0, 0, 0]),
-    PlayerSwipeInput: Uint8Array.of(...[0, 0, 0, 1]),
-    SessionInfo: Uint8Array.of(...[0, 0, 0, 2]),
+    PlayerPosition: 0,
+    PlayerSwipeInput: 1,
+    SessionInfo: 2,
+    FoodPosition: 3,
 } as const;
 
 export type GameMessageType = keyof typeof GAME_MESSAGE_TYPE_BYTES;
 
-export function msgTypeFromU32(value: number): GameMessageType {
-    switch (value) {
-        case 0:
-            return "PlayerPosition";
-        case 1:
-            return "PlayerSwipeInput";
-        case 2:
-            return "SessionInfo";
-        default:
-            throw new Error(`Expected valid message type. Received ${value}`);
-    }
-}
-
 export function msgTypeIntoBytes(type: GameMessageType): Uint8Array {
-    return GAME_MESSAGE_TYPE_BYTES[type];
+    return u32ToBytes(GAME_MESSAGE_TYPE_BYTES[type]);
 }

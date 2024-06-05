@@ -11,7 +11,7 @@ describe("playerCoords", () => {
                     // Tick Number
                     0, 0, 0, 0,
                     // Coordinate Point 1
-                    0, 0, 0, 42, 0, 0, 0, 24,
+                    0, 42, 0, 24,
                 ],
             ).buffer,
         );
@@ -36,11 +36,11 @@ describe("playerCoords", () => {
                     // Tick Number
                     0, 0, 0, 0,
                     // Coordinate Point 1
-                    0, 0, 1, 42, 0, 0, 0, 24,
+                    1, 42, 0, 24,
                     // Coordinate Point 2
-                    0, 0, 1, 42, 0, 0, 0, 25,
+                    1, 42, 0, 25,
                     // Coordinate Point 3
-                    0, 0, 1, 42, 0, 0, 0, 26,
+                    1, 42, 0, 26,
                 ],
             ).buffer,
         );
@@ -69,7 +69,7 @@ describe("playerCoords", () => {
                     // Tick Number
                     0, 0, 0, 0,
                     // Coordinate Point 1
-                    0, 0, 0, 42, 0,
+                    0, 42, 0,
                 ],
             ).buffer,
         );

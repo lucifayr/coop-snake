@@ -2,7 +2,7 @@ import { assert } from "@/src/assert";
 import { Coordinate } from "@/src/binary/coordinate";
 import { Group, Rect } from "@shopify/react-native-skia";
 import { PLAYERS, Player } from "@/src/binary/player";
-import { gridPosToPixels, snakeSegemntSize } from "@/src/scaling";
+import { gridPosToPixels, gridCellSize } from "@/src/scaling";
 import { Component } from "react";
 
 export type SnakeProperties = {
@@ -28,10 +28,10 @@ export class Snake extends Component<SnakeProperties> {
     render() {
         const canvasWidth = this.props.layout.width;
         const segments = this.props.coords.map((coord, idx) => {
-            const xPosPercentage = gridPosToPixels(coord.x, canvasWidth);
-            const yPosPercentage = gridPosToPixels(coord.y, canvasWidth);
+            const xPos = gridPosToPixels(coord.x, canvasWidth);
+            const yPos = gridPosToPixels(coord.y, canvasWidth);
 
-            const size = snakeSegemntSize(canvasWidth);
+            const size = gridCellSize(canvasWidth);
             const color = playerColor(this.props.playerId, idx === 0);
             return (
                 <Rect
@@ -39,8 +39,8 @@ export class Snake extends Component<SnakeProperties> {
                     color={color}
                     width={size}
                     height={size}
-                    x={xPosPercentage}
-                    y={yPosPercentage}
+                    x={xPos}
+                    y={yPos}
                 />
             );
         });
@@ -58,7 +58,7 @@ function playerColor(player: Player, isHead: boolean): string {
             return "#0000ff";
         case "Player2":
             if (isHead) {
-                return "#ff00ff";
+                return "#00ffff";
             }
             return "#00ff00";
     }

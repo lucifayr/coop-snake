@@ -1,39 +1,40 @@
-import { assert } from "../assert";
+import { constKeyFromValueMap } from "./utils";
 
 const SESSION_INFO_TYPES = {
     SessionKey: 0,
     PlayerToken: 1,
     BoardSize: 2,
+    GameOver: 3,
 } as const;
 
-type SessionInfoType = keyof typeof SESSION_INFO_TYPES;
+const GAME_OVER_CAUSES = {
+    CollisionBounds: 0,
+    CollisionSelf: 1,
+    CollisionOther: 2,
+} as const;
 
-function infoTypeFromByte(byte: number): SessionInfoType | undefined {
-    switch (byte) {
-        case SESSION_INFO_TYPES["SessionKey"]:
-            return "SessionKey";
-        case SESSION_INFO_TYPES["PlayerToken"]:
-            return "PlayerToken";
-        case SESSION_INFO_TYPES["BoardSize"]:
-            return "BoardSize";
-        default:
-            return undefined;
-    }
-}
+export type SessionInfoType = keyof typeof SESSION_INFO_TYPES;
+export type GameOverCause = keyof typeof GAME_OVER_CAUSES;
 
-export type SessionInfo = { type: SessionInfoType; value: number };
+export type SessionInfo =
+    | {
+          type: Extract<
+              SessionInfoType,
+              "SessionKey" | "PlayerToken" | "BoardSize"
+          >;
+          value: number;
+      }
+    | { type: "GameOver"; cause: GameOverCause };
 
 export function parseSessionInfoMsg(bytes: DataView): SessionInfo {
-    assert(
-        bytes.byteLength === 5,
-        `Expected 5 bytes of data for session info msg. Received ${bytes.byteLength}`,
-    );
-
     const typeByte = bytes.getUint8(0);
-    const type = infoTypeFromByte(typeByte);
-    assert(type !== undefined, `Received invalid type byte ${typeByte}`);
+    const type = constKeyFromValueMap(typeByte, SESSION_INFO_TYPES);
+    if (type === "GameOver") {
+        const byte = bytes.getUint8(1);
+        const cause = constKeyFromValueMap(byte, GAME_OVER_CAUSES);
+        return { type, cause };
+    }
 
     const value = bytes.getUint32(1);
-
     return { value, type: type! };
 }

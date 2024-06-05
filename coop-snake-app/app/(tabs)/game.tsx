@@ -1,13 +1,18 @@
-import { Hidden } from "@/components/Game/Hidden";
 import { Snake, SnakeProperties } from "@/components/Game/Snake";
 import { GameLoop } from "@/src/gameLoop";
 import { COORDINATE_BYTE_WIDTH, Coordinate } from "@/src/binary/coordinate";
 import { Player } from "@/src/binary/player";
-import { DEBUG_COORDS } from "@/src/debug/data";
 import { AntDesign } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { ReactElement, ReactNode, useEffect, useRef } from "react";
-import { Pressable, StatusBar, StyleSheet, Text, View } from "react-native";
+import { ReactNode, useEffect, useRef } from "react";
+import {
+    Alert,
+    Pressable,
+    StatusBar,
+    StyleSheet,
+    Text,
+    View,
+} from "react-native";
 import { GameEngine } from "react-native-game-engine";
 import { playerCoordsFromMsg } from "@/src/playerCoords";
 import {
@@ -22,10 +27,13 @@ import {
     GestureDetector,
     GestureHandlerRootView,
     ComposedGesture,
+    FlingGesture,
 } from "react-native-gesture-handler";
-import { global } from "@/src/stores/globalStore";
+import { globalS } from "@/src/stores/globalStore";
 import { swipeInputMsg } from "@/src/binary/swipe";
 import { SessionInfo, parseSessionInfoMsg } from "@/src/binary/sessionInfo";
+import { foodCoordFromMsg } from "@/src/foodCoords";
+import { Food, FoodProperties } from "@/components/Game/Food";
 
 export type GameEntities = {
     player1: {
@@ -38,33 +46,30 @@ export type GameEntities = {
         coords: Coordinate[];
         renderer: React.ComponentType<SnakeProperties>;
     };
-    debug: {
-        data?: {
-            rawCoords: Uint8Array;
-            rawCoordsOffset: number;
-        };
-        renderer: ReactElement;
+    food1: {
+        playerId: Player;
+        coord: Coordinate | undefined;
+        renderer: React.ComponentType<FoodProperties>;
+    };
+    food2: {
+        playerId: Player;
+        coord: Coordinate | undefined;
+        renderer: React.ComponentType<FoodProperties>;
     };
 };
 
 export default function GameScreen() {
-    const isDebugActive = process.env.EXPO_PUBLIC_DEBUG === "true";
-
     const socket = useRef<WebSocket | undefined>(undefined);
     const token = useRef<number | undefined>(undefined);
     const { view: msgView, writeCanonicalBytes: msgWriteCanonicalBytes } =
         useBuffer(
-            global.getBoardSize() *
-                global.getBoardSize() *
+            globalS.getBoardSize() *
+                globalS.getBoardSize() *
                 COORDINATE_BYTE_WIDTH *
                 16,
         );
 
     useEffect(() => {
-        if (isDebugActive) {
-            return;
-        }
-
         const url = `${process.env.EXPO_PUBLIC_WEBSOCKET_BASE_URL}/game/tmp`;
         const ws = new WebSocket(url);
 
@@ -91,8 +96,13 @@ export default function GameScreen() {
 
             if (msg.messageType === "PlayerPosition") {
                 const playerCoords = playerCoordsFromMsg(msg);
-                global.setTickN(playerCoords.tickN);
-                global.setCoords(playerCoords.player, playerCoords.coords);
+                globalS.setTickN(playerCoords.tickN);
+                globalS.setCoords(playerCoords.player, playerCoords.coords);
+            }
+
+            if (msg.messageType === "FoodPosition") {
+                const foodCoord = foodCoordFromMsg(msg);
+                globalS.setFood(foodCoord.player, foodCoord.coord);
             }
         };
 
@@ -102,7 +112,12 @@ export default function GameScreen() {
             }
 
             if (info.type === "BoardSize") {
-                global.setBoardSize(info.value);
+                globalS.setBoardSize(info.value);
+            }
+
+            if (info.type === "GameOver") {
+                globalS.setGameOver(info.cause);
+                Alert.alert(`Game Over : ${info.cause}`);
             }
         };
 
@@ -116,39 +131,43 @@ export default function GameScreen() {
             ws.removeEventListener("error", onErr);
             ws.close();
         };
-    }, [isDebugActive, msgView, msgWriteCanonicalBytes]);
+    }, [msgView, msgWriteCanonicalBytes]);
 
     return (
         <GameScreenContainer
             onSwipe={swipeGestures({
-                up: () => {
+                UP: () => {
+                    console.log("up");
                     const msg = swipeInputMsg(
                         "up",
-                        global.getTickN(),
+                        globalS.getTickN(),
                         token.current,
                     );
                     socket.current?.send(binMsgIntoBytes(msg));
                 },
-                right: () => {
+                RIGHT: () => {
+                    console.log("right");
                     const msg = swipeInputMsg(
                         "right",
-                        global.getTickN(),
+                        globalS.getTickN(),
                         token.current,
                     );
                     socket.current?.send(binMsgIntoBytes(msg));
                 },
-                down: () => {
+                DOWN: () => {
+                    console.log("down");
                     const msg = swipeInputMsg(
                         "down",
-                        global.getTickN(),
+                        globalS.getTickN(),
                         token.current,
                     );
                     socket.current?.send(binMsgIntoBytes(msg));
                 },
-                left: () => {
+                LEFT: () => {
+                    console.log("left");
                     const msg = swipeInputMsg(
                         "left",
-                        global.getTickN(),
+                        globalS.getTickN(),
                         token.current,
                     );
                     socket.current?.send(binMsgIntoBytes(msg));
@@ -158,7 +177,7 @@ export default function GameScreen() {
             <GameEngine
                 renderer={GameCanvas}
                 systems={[GameLoop]}
-                entities={initialEntities(isDebugActive)}
+                entities={initialEntities()}
                 running={true}
             >
                 <StatusBar hidden={true} />
@@ -201,7 +220,7 @@ function GameScreenContainer({
     );
 }
 
-function initialEntities(isDebug: boolean): GameEntities {
+function initialEntities(): GameEntities {
     return {
         player1: {
             playerId: "Player1",
@@ -213,47 +232,78 @@ function initialEntities(isDebug: boolean): GameEntities {
             coords: [],
             renderer: Snake,
         },
-        // TODO: massive HACK, please fix asap
-        debug: {
-            data: isDebug
-                ? {
-                      rawCoords: DEBUG_COORDS,
-                      rawCoordsOffset: 0,
-                  }
-                : undefined,
-            renderer: <Hidden />,
+        food1: {
+            playerId: "Player1",
+            coord: undefined,
+            renderer: Food,
+        },
+        food2: {
+            playerId: "Player2",
+            coord: undefined,
+            renderer: Food,
         },
     };
 }
 
-function swipeGestures(callbacks: {
-    up: () => void;
-    right: () => void;
-    down: () => void;
-    left: () => void;
-}): ComposedGesture {
-    const gestureSwipeUp = Gesture.Fling();
-    gestureSwipeUp.config.direction = Directions.UP;
-    gestureSwipeUp.onEnd(callbacks.up);
+type SwipeCallbacks = {
+    UP: () => void;
+    RIGHT: () => void;
+    DOWN: () => void;
+    LEFT: () => void;
+};
 
-    const gestureSwipeRight = Gesture.Fling();
-    gestureSwipeRight.config.direction = Directions.RIGHT;
-    gestureSwipeRight.onEnd(callbacks.right);
+function swipeGestures(callbacks: SwipeCallbacks): ComposedGesture {
+    const gesUp = swipe("UP", callbacks);
+    const gesRight = swipe("RIGHT", callbacks);
+    const gesDown = swipe("DOWN", callbacks);
+    const gesLeft = swipe("LEFT", callbacks);
 
-    const gestureSwipeDown = Gesture.Fling();
-    gestureSwipeDown.config.direction = Directions.DOWN;
-    gestureSwipeDown.onEnd(callbacks.down);
+    const gesUpRight = diagonalSwipe("UP", "RIGHT", callbacks);
+    const gesUpLeft = diagonalSwipe("UP", "LEFT", callbacks);
+    const gesDownRight = diagonalSwipe("DOWN", "RIGHT", callbacks);
+    const gesDownLeft = diagonalSwipe("DOWN", "LEFT", callbacks);
 
-    const gestureSwipeLeft = Gesture.Fling();
-    gestureSwipeLeft.config.direction = Directions.LEFT;
-    gestureSwipeLeft.onEnd(callbacks.left);
-
-    return Gesture.Race(
-        gestureSwipeUp,
-        gestureSwipeRight,
-        gestureSwipeDown,
-        gestureSwipeLeft,
+    return Gesture.Exclusive(
+        gesUp,
+        gesRight,
+        gesDown,
+        gesLeft,
+        gesUpRight,
+        gesUpLeft,
+        gesDownRight,
+        gesDownLeft,
     );
+}
+
+function swipe(
+    dir: keyof typeof Directions,
+    callbacks: SwipeCallbacks,
+): FlingGesture {
+    const gesture = Gesture.Fling();
+    gesture.config.direction = Directions[dir];
+    gesture.onEnd(() => {
+        callbacks[dir]();
+    });
+
+    return gesture;
+}
+
+function diagonalSwipe(
+    dir1: keyof typeof Directions,
+    dir2: keyof typeof Directions,
+    callbacks: SwipeCallbacks,
+): FlingGesture {
+    const gesture = Gesture.Fling();
+    gesture.config.direction = Directions[dir1] | Directions[dir2];
+    gesture.onEnd(() => {
+        if (globalS.getDirection(globalS.me()) == dir1) {
+            callbacks[dir2]();
+        } else {
+            callbacks[dir1]();
+        }
+    });
+
+    return gesture;
 }
 
 const styles = StyleSheet.create({
