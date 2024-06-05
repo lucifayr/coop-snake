@@ -137,7 +137,6 @@ export default function GameScreen() {
         <GameScreenContainer
             onSwipe={swipeGestures({
                 UP: () => {
-                    console.log("up");
                     const msg = swipeInputMsg(
                         "up",
                         globalS.getTickN(),
@@ -146,7 +145,6 @@ export default function GameScreen() {
                     socket.current?.send(binMsgIntoBytes(msg));
                 },
                 RIGHT: () => {
-                    console.log("right");
                     const msg = swipeInputMsg(
                         "right",
                         globalS.getTickN(),
@@ -155,7 +153,6 @@ export default function GameScreen() {
                     socket.current?.send(binMsgIntoBytes(msg));
                 },
                 DOWN: () => {
-                    console.log("down");
                     const msg = swipeInputMsg(
                         "down",
                         globalS.getTickN(),
@@ -164,7 +161,6 @@ export default function GameScreen() {
                     socket.current?.send(binMsgIntoBytes(msg));
                 },
                 LEFT: () => {
-                    console.log("left");
                     const msg = swipeInputMsg(
                         "left",
                         globalS.getTickN(),
