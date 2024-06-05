@@ -27,6 +27,7 @@ import {
     GestureDetector,
     GestureHandlerRootView,
     ComposedGesture,
+    FlingGesture,
 } from "react-native-gesture-handler";
 import { globalS } from "@/src/stores/globalStore";
 import { swipeInputMsg } from "@/src/binary/swipe";
@@ -135,7 +136,8 @@ export default function GameScreen() {
     return (
         <GameScreenContainer
             onSwipe={swipeGestures({
-                up: () => {
+                UP: () => {
+                    console.log("up");
                     const msg = swipeInputMsg(
                         "up",
                         globalS.getTickN(),
@@ -143,7 +145,8 @@ export default function GameScreen() {
                     );
                     socket.current?.send(binMsgIntoBytes(msg));
                 },
-                right: () => {
+                RIGHT: () => {
+                    console.log("right");
                     const msg = swipeInputMsg(
                         "right",
                         globalS.getTickN(),
@@ -151,7 +154,8 @@ export default function GameScreen() {
                     );
                     socket.current?.send(binMsgIntoBytes(msg));
                 },
-                down: () => {
+                DOWN: () => {
+                    console.log("down");
                     const msg = swipeInputMsg(
                         "down",
                         globalS.getTickN(),
@@ -159,7 +163,8 @@ export default function GameScreen() {
                     );
                     socket.current?.send(binMsgIntoBytes(msg));
                 },
-                left: () => {
+                LEFT: () => {
+                    console.log("left");
                     const msg = swipeInputMsg(
                         "left",
                         globalS.getTickN(),
@@ -240,34 +245,65 @@ function initialEntities(): GameEntities {
     };
 }
 
-function swipeGestures(callbacks: {
-    up: () => void;
-    right: () => void;
-    down: () => void;
-    left: () => void;
-}): ComposedGesture {
-    const gestureSwipeUp = Gesture.Fling();
-    gestureSwipeUp.config.direction = Directions.UP;
-    gestureSwipeUp.onEnd(callbacks.up);
+type SwipeCallbacks = {
+    UP: () => void;
+    RIGHT: () => void;
+    DOWN: () => void;
+    LEFT: () => void;
+};
 
-    const gestureSwipeRight = Gesture.Fling();
-    gestureSwipeRight.config.direction = Directions.RIGHT;
-    gestureSwipeRight.onEnd(callbacks.right);
+function swipeGestures(callbacks: SwipeCallbacks): ComposedGesture {
+    const gesUp = swipe("UP", callbacks);
+    const gesRight = swipe("RIGHT", callbacks);
+    const gesDown = swipe("DOWN", callbacks);
+    const gesLeft = swipe("LEFT", callbacks);
 
-    const gestureSwipeDown = Gesture.Fling();
-    gestureSwipeDown.config.direction = Directions.DOWN;
-    gestureSwipeDown.onEnd(callbacks.down);
+    const gesUpRight = diagonalSwipe("UP", "RIGHT", callbacks);
+    const gesUpLeft = diagonalSwipe("UP", "LEFT", callbacks);
+    const gesDownRight = diagonalSwipe("DOWN", "RIGHT", callbacks);
+    const gesDownLeft = diagonalSwipe("DOWN", "LEFT", callbacks);
 
-    const gestureSwipeLeft = Gesture.Fling();
-    gestureSwipeLeft.config.direction = Directions.LEFT;
-    gestureSwipeLeft.onEnd(callbacks.left);
-
-    return Gesture.Race(
-        gestureSwipeUp,
-        gestureSwipeRight,
-        gestureSwipeDown,
-        gestureSwipeLeft,
+    return Gesture.Exclusive(
+        gesUp,
+        gesRight,
+        gesDown,
+        gesLeft,
+        gesUpRight,
+        gesUpLeft,
+        gesDownRight,
+        gesDownLeft,
     );
+}
+
+function swipe(
+    dir: keyof typeof Directions,
+    callbacks: SwipeCallbacks,
+): FlingGesture {
+    const gesture = Gesture.Fling();
+    gesture.config.direction = Directions[dir];
+    gesture.onEnd(() => {
+        callbacks[dir]();
+    });
+
+    return gesture;
+}
+
+function diagonalSwipe(
+    dir1: keyof typeof Directions,
+    dir2: keyof typeof Directions,
+    callbacks: SwipeCallbacks,
+): FlingGesture {
+    const gesture = Gesture.Fling();
+    gesture.config.direction = Directions[dir1] | Directions[dir2];
+    gesture.onEnd(() => {
+        if (globalS.getDirection(globalS.me()) == dir1) {
+            callbacks[dir2]();
+        } else {
+            callbacks[dir1]();
+        }
+    });
+
+    return gesture;
 }
 
 const styles = StyleSheet.create({

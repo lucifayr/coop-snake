@@ -1,3 +1,4 @@
+import { Directions } from "react-native-gesture-handler";
 import { Coordinate } from "../binary/coordinate";
 import { Player } from "../binary/player";
 import { GameOverCause } from "../binary/sessionInfo";
@@ -5,6 +6,7 @@ import { GameOverCause } from "../binary/sessionInfo";
 const store = {
     tickN: 0,
     boardSize: 32,
+    me: "Player1" as Player,
     gameState: {
         gameOver: false,
         gameOverCause: undefined as GameOverCause | undefined,
@@ -28,12 +30,14 @@ const store = {
 type DebugFlag = "show-grid-lines";
 
 export const globalS = {
+    me,
     getTickN,
     setTickN,
     getBoardSize,
     setBoardSize,
     getCoords,
     setCoords,
+    getDirection,
     getFood,
     setFood,
     hasDebugFlag,
@@ -89,4 +93,32 @@ function getGameOverInfo():
 function setGameOver(cause: GameOverCause) {
     store.gameState.gameOver = true;
     store.gameState.gameOverCause = cause;
+}
+
+function getDirection(player: Player): keyof typeof Directions {
+    const p1 = store.coords[player][0];
+    const p2 = store.coords[player][1];
+
+    const dx = p1?.x - p2?.x;
+    if (dx === 1) {
+        return "RIGHT";
+    }
+    if (dx === -1) {
+        return "LEFT";
+    }
+
+    const dy = p1?.y - p2?.y;
+    if (dy === 1) {
+        return "DOWN";
+    }
+    if (dy === -1) {
+        return "UP";
+    }
+
+    // fallback
+    return "RIGHT";
+}
+
+function me(): Player {
+    return store.me;
 }
