@@ -1,25 +1,19 @@
 import { Directions } from "react-native-gesture-handler";
 import { Coordinate } from "../binary/coordinate";
-import { Player } from "../binary/player";
 import { GameOverCause } from "../binary/sessionInfo";
 
 const store = {
     tickN: 0,
     boardSize: 32,
+    playerCount: 2,
     sessionKey: undefined as string | undefined,
-    me: "Player1" as Player,
+    me: 1, // TODO: figure out what player we are from the server
     gameState: {
         gameOver: false,
         gameOverCause: undefined as GameOverCause | undefined,
     },
-    coords: {
-        Player1: [] as Coordinate[],
-        Player2: [] as Coordinate[],
-    },
-    food: {
-        Player1: undefined as Coordinate | undefined,
-        Player2: undefined as Coordinate | undefined,
-    },
+    coords: new Map<number, Coordinate[]>(),
+    food: new Map<number, Coordinate>(),
     debug: {
         flags: {
             "show-grid-lines":
@@ -36,6 +30,8 @@ export const globalS = {
     setTickN,
     getBoardSize,
     setBoardSize,
+    getPlayerCount,
+    setPlayerCount,
     getCoords,
     setCoords,
     getDirection,
@@ -63,20 +59,29 @@ function getBoardSize(): number {
 function setBoardSize(boardSize: number) {
     store.boardSize = boardSize;
 }
-function getCoords(player: Player): Coordinate[] {
-    return store.coords[player];
+
+function getPlayerCount(): number {
+    return store.playerCount;
 }
 
-function setCoords(player: Player, coords: Coordinate[]) {
-    store.coords[player] = coords;
+function setPlayerCount(count: number) {
+    store.playerCount = count;
 }
 
-function getFood(player: Player): Coordinate | undefined {
-    return store.food[player];
+function getCoords(player: number): Coordinate[] | undefined {
+    return store.coords.get(player);
 }
 
-function setFood(player: Player, coord: Coordinate) {
-    store.food[player] = coord;
+function setCoords(player: number, coords: Coordinate[]) {
+    store.coords.set(player, coords);
+}
+
+function getFood(player: number): Coordinate | undefined {
+    return store.food.get(player);
+}
+
+function setFood(player: number, coord: Coordinate) {
+    store.food.set(player, coord);
 }
 
 function hasDebugFlag(flag: DebugFlag): boolean {
@@ -98,9 +103,14 @@ function setGameOver(cause: GameOverCause) {
     store.gameState.gameOverCause = cause;
 }
 
-function getDirection(player: Player): keyof typeof Directions {
-    const p1 = store.coords[player][0];
-    const p2 = store.coords[player][1];
+function getDirection(player: number): keyof typeof Directions {
+    const coords = store.coords.get(player);
+    if (!coords) {
+        return "RIGHT";
+    }
+
+    const p1 = coords[0];
+    const p2 = coords[1];
 
     const dx = p1?.x - p2?.x;
     if (dx === 1) {
@@ -122,7 +132,7 @@ function getDirection(player: Player): keyof typeof Directions {
     return "RIGHT";
 }
 
-function me(): Player {
+function me(): number {
     return store.me;
 }
 

@@ -1,10 +1,9 @@
 import { assert } from "./assert";
 import { Coordinate, coordFromBytes } from "./binary/coordinate";
 import { GameBinaryMessage } from "./binary/gameBinaryMessage";
-import { PLAYER_BYTE_WIDTH, Player, playerFromU8 } from "./binary/player";
 
 export type FoodCoordinate = {
-    player: Player;
+    player: number;
     coord: Coordinate;
 };
 
@@ -14,8 +13,8 @@ export function foodCoordFromMsg(msg: GameBinaryMessage): FoodCoordinate {
         `Expected type of message to be 'FoodPosition'. Received ${msg.messageType}.`,
     );
 
-    const player = playerFromU8(msg.data.getUint8(0));
-    const coord = coordFromBytes(msg.data, PLAYER_BYTE_WIDTH);
+    const player = msg.data.getUint8(0);
+    const coord = coordFromBytes(msg.data, 1);
 
     return { player, coord };
 }

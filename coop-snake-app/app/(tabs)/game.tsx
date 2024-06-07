@@ -1,7 +1,6 @@
-import { Snake, SnakeProperties } from "@/components/Game/Snake";
+import { SnakeProperties } from "@/components/Game/Snake";
 import { GameLoop } from "@/src/gameLoop";
 import { COORDINATE_BYTE_WIDTH, Coordinate } from "@/src/binary/coordinate";
-import { Player } from "@/src/binary/player";
 import { AntDesign } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { ReactNode, useEffect, useRef } from "react";
@@ -33,28 +32,22 @@ import { globalS } from "@/src/stores/globalStore";
 import { swipeInputMsg } from "@/src/binary/swipe";
 import { SessionInfo, parseSessionInfoMsg } from "@/src/binary/sessionInfo";
 import { foodCoordFromMsg } from "@/src/foodCoords";
-import { Food, FoodProperties } from "@/components/Game/Food";
+import { FoodProperties } from "@/components/Game/Food";
 
 export type GameEntities = {
-    player1: {
-        playerId: Player;
-        coords: Coordinate[];
-        renderer: React.ComponentType<SnakeProperties>;
+    players: {
+        [key: number]: {
+            playerId: number;
+            coords: Coordinate[];
+            renderer: React.ComponentType<SnakeProperties>;
+        };
     };
-    player2: {
-        playerId: Player;
-        coords: Coordinate[];
-        renderer: React.ComponentType<SnakeProperties>;
-    };
-    food1: {
-        playerId: Player;
-        coord: Coordinate | undefined;
-        renderer: React.ComponentType<FoodProperties>;
-    };
-    food2: {
-        playerId: Player;
-        coord: Coordinate | undefined;
-        renderer: React.ComponentType<FoodProperties>;
+    foods: {
+        [key: number]: {
+            playerId: number;
+            coord: Coordinate | undefined;
+            renderer: React.ComponentType<FoodProperties>;
+        };
     };
 };
 
@@ -218,26 +211,8 @@ function GameScreenContainer({
 
 function initialEntities(): GameEntities {
     return {
-        player1: {
-            playerId: "Player1",
-            coords: [],
-            renderer: Snake,
-        },
-        player2: {
-            playerId: "Player2",
-            coords: [],
-            renderer: Snake,
-        },
-        food1: {
-            playerId: "Player1",
-            coord: undefined,
-            renderer: Food,
-        },
-        food2: {
-            playerId: "Player2",
-            coord: undefined,
-            renderer: Food,
-        },
+        players: [],
+        foods: [],
     };
 }
 
