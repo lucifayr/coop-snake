@@ -1,5 +1,5 @@
 import Button from "@/components/Button";
-import Input from "@/components/Input";
+import { globalS } from "@/src/stores/globalStore";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -9,6 +9,7 @@ import {
     Modal,
     StatusBar,
     StyleSheet,
+    TextInput,
     View,
 } from "react-native";
 
@@ -28,8 +29,8 @@ export default function HomeScreen() {
 
             <View style={styles.container}>
                 <Button
-                    onClick={() => router.navigate("/game")}
-                    text="Start new Game"
+                    onClick={() => router.navigate("/new-session")}
+                    text="Create new Game"
                 />
                 <Button
                     onClick={() => setIsModalVisible(true)}
@@ -41,7 +42,6 @@ export default function HomeScreen() {
                 />
             </View>
 
-            {/* <View style={styles.centeredView}> */}
             <Modal
                 animationType="slide"
                 transparent={true}
@@ -51,12 +51,18 @@ export default function HomeScreen() {
                 }}
             >
                 <View style={styles.modalView}>
-                    <Input
-                        placeholder="000-000"
-                        onChange={(e) => console.log(e)}
+                    <TextInput
+                        placeholder="000000"
+                        maxLength={6}
+                        onChangeText={(text) => {
+                            globalS.setSessionKey(text);
+                        }}
                     />
                     <Button
-                        onClick={() => setIsModalVisible(false)}
+                        onClick={() => {
+                            setIsModalVisible(false);
+                            router.navigate("/game");
+                        }}
                         text="Join"
                     ></Button>
                     <Btn title="Close" color="#ebd29d" onPress={handleModal} />

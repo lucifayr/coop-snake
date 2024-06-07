@@ -6,6 +6,7 @@ import { GameOverCause } from "../binary/sessionInfo";
 const store = {
     tickN: 0,
     boardSize: 32,
+    sessionKey: undefined as string | undefined,
     me: "Player1" as Player,
     gameState: {
         gameOver: false,
@@ -43,6 +44,8 @@ export const globalS = {
     hasDebugFlag,
     getGameOverInfo,
     setGameOver,
+    getSessionKey,
+    setSessionKey,
 } as const;
 
 function getTickN(): number {
@@ -121,4 +124,12 @@ function getDirection(player: Player): keyof typeof Directions {
 
 function me(): Player {
     return store.me;
+}
+
+function getSessionKey(): string | undefined {
+    return store.sessionKey;
+}
+
+function setSessionKey(sessionKey: string | undefined) {
+    store.sessionKey = sessionKey;
 }

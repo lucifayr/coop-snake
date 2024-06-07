@@ -70,7 +70,7 @@ export default function GameScreen() {
         );
 
     useEffect(() => {
-        const url = `${process.env.EXPO_PUBLIC_WEBSOCKET_BASE_URL}/game/tmp`;
+        const url = `${process.env.EXPO_PUBLIC_WEBSOCKET_BASE_URL}/game/session/${globalS.getSessionKey()}`;
         const ws = new WebSocket(url);
 
         const onErr = (e: WebSocketMessageEvent) => {
