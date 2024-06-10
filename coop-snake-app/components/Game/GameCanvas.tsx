@@ -24,7 +24,8 @@ export function GameCanvas(
     return (
         <Canvas style={{ width: "100%", height: "100%" }}>
             {lines}
-            {renderer(entities, screen, layout)}
+            {renderer(entities?.players, screen, layout)}
+            {renderer(entities?.foods, screen, layout)}
         </Canvas>
     );
 }

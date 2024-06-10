@@ -34,6 +34,13 @@
                 {
                     "android": {
                         "usesCleartextTraffic": true
+                    },
+                    "infoPlist": {
+                        "NSAppTransportSecurity": [
+                            {
+                                "xml": "<dict><key>NSAllowsArbitraryLoads</key><true /></dict>"
+                            }
+                        ]
                     }
                 }
             ]
