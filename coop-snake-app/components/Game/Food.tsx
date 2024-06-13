@@ -11,10 +11,6 @@ export type FoodProperties = {
 };
 
 export class Food extends Component<FoodProperties> {
-    constructor(props: FoodProperties) {
-        super(props);
-    }
-
     render() {
         if (this.props.coord === undefined) {
             return null;

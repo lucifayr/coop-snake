@@ -267,7 +267,7 @@ function diagonalSwipe(
     const gesture = Gesture.Fling();
     gesture.config.direction = Directions[dir1] | Directions[dir2];
     gesture.onEnd(() => {
-        if (globalS.getDirection(globalS.me()) == dir1) {
+        if (globalS.getDirection(globalS.me()) === dir1) {
             callbacks[dir2]();
         } else {
             callbacks[dir1]();
