@@ -2,12 +2,13 @@ import { Directions } from "react-native-gesture-handler";
 import { Coordinate } from "../binary/coordinate";
 import { GameOverCause } from "../binary/sessionInfo";
 
+// Internal store with default values
 const store = {
     tickN: 0,
     boardSize: 32,
     playerCount: 2,
     sessionKey: undefined as string | undefined,
-    me: 1, // TODO: figure out what player we are from the server
+    me: 1,
     gameState: {
         gameOver: false,
         gameOverCause: undefined as GameOverCause | undefined,
@@ -26,6 +27,7 @@ type DebugFlag = "show-grid-lines";
 
 export const globalData = {
     me,
+    setMe,
     getTickN,
     setTickN,
     getBoardSize,
@@ -134,6 +136,10 @@ function getDirection(player: number): keyof typeof Directions {
 
 function me(): number {
     return store.me;
+}
+
+function setMe(me: number) {
+    store.me = me;
 }
 
 function getSessionKey(): string | undefined {

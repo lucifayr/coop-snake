@@ -100,6 +100,10 @@ export default function GameScreen() {
         };
 
         const onSessionInfo = (info: SessionInfo) => {
+            if (info.type === "PlayerId") {
+                globalData.setMe(info.value);
+            }
+
             if (info.type === "PlayerToken") {
                 token.current = info.value;
             }
