@@ -1,5 +1,5 @@
 import { GameEntities } from "@/app/(tabs)/game";
-import { globalS } from "./stores/globalStore";
+import { globalData } from "./stores/globalStore";
 import { Snake } from "@/components/Game/Snake";
 import { Food } from "@/components/Game/Food";
 
@@ -8,13 +8,13 @@ export const randomBetween = (min: number, max: number): number => {
 };
 
 export const GameLoop = (entities: GameEntities): GameEntities => {
-    if (globalS.getGameOverInfo().gameOver) {
+    if (globalData.getGameOverInfo().gameOver) {
         return entities;
     }
 
-    for (let i = 1; i <= globalS.getPlayerCount(); i++) {
-        const playerCoords = globalS.getCoords(i) ?? [];
-        const foodCoord = globalS.getFood(i);
+    for (let i = 1; i <= globalData.getPlayerCount(); i++) {
+        const playerCoords = globalData.getCoords(i) ?? [];
+        const foodCoord = globalData.getFood(i);
 
         const player = entities.players[i];
         if (!player) {

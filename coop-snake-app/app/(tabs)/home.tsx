@@ -1,5 +1,5 @@
 import Button from "@/components/Button";
-import { globalS } from "@/src/stores/globalStore";
+import { globalData } from "@/src/stores/globalStore";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -55,7 +55,7 @@ export default function HomeScreen() {
                         placeholder="000000"
                         maxLength={6}
                         onChangeText={(text) => {
-                            globalS.setSessionKey(text);
+                            globalData.setSessionKey(text);
                         }}
                     />
                     <Button

@@ -28,7 +28,7 @@ import {
     ComposedGesture,
     FlingGesture,
 } from "react-native-gesture-handler";
-import { globalS } from "@/src/stores/globalStore";
+import { globalData } from "@/src/stores/globalStore";
 import { swipeInputMsg } from "@/src/binary/swipe";
 import { SessionInfo, parseSessionInfoMsg } from "@/src/binary/sessionInfo";
 import { foodCoordFromMsg } from "@/src/foodCoords";
@@ -56,14 +56,14 @@ export default function GameScreen() {
     const token = useRef<number | undefined>(undefined);
     const { view: msgView, writeCanonicalBytes: msgWriteCanonicalBytes } =
         useBuffer(
-            globalS.getBoardSize() *
-                globalS.getBoardSize() *
+            globalData.getBoardSize() *
+                globalData.getBoardSize() *
                 COORDINATE_BYTE_WIDTH *
                 16,
         );
 
     useEffect(() => {
-        const url = `${process.env.EXPO_PUBLIC_WEBSOCKET_BASE_URL}/game/session/${globalS.getSessionKey()}`;
+        const url = `${process.env.EXPO_PUBLIC_WEBSOCKET_BASE_URL}/game/session/${globalData.getSessionKey()}`;
         const ws = new WebSocket(url);
 
         const onErr = (e: WebSocketMessageEvent) => {
@@ -89,13 +89,13 @@ export default function GameScreen() {
 
             if (msg.messageType === "PlayerPosition") {
                 const playerCoords = playerCoordsFromMsg(msg);
-                globalS.setTickN(playerCoords.tickN);
-                globalS.setCoords(playerCoords.player, playerCoords.coords);
+                globalData.setTickN(playerCoords.tickN);
+                globalData.setCoords(playerCoords.player, playerCoords.coords);
             }
 
             if (msg.messageType === "FoodPosition") {
                 const foodCoord = foodCoordFromMsg(msg);
-                globalS.setFood(foodCoord.player, foodCoord.coord);
+                globalData.setFood(foodCoord.player, foodCoord.coord);
             }
         };
 
@@ -105,11 +105,11 @@ export default function GameScreen() {
             }
 
             if (info.type === "BoardSize") {
-                globalS.setBoardSize(info.value);
+                globalData.setBoardSize(info.value);
             }
 
             if (info.type === "GameOver") {
-                globalS.setGameOver(info.cause);
+                globalData.setGameOver(info.cause);
                 Alert.alert(`Game Over : ${info.cause}`);
             }
         };
@@ -132,7 +132,7 @@ export default function GameScreen() {
                 UP: () => {
                     const msg = swipeInputMsg(
                         "up",
-                        globalS.getTickN(),
+                        globalData.getTickN(),
                         token.current,
                     );
                     socket.current?.send(binMsgIntoBytes(msg));
@@ -140,7 +140,7 @@ export default function GameScreen() {
                 RIGHT: () => {
                     const msg = swipeInputMsg(
                         "right",
-                        globalS.getTickN(),
+                        globalData.getTickN(),
                         token.current,
                     );
                     socket.current?.send(binMsgIntoBytes(msg));
@@ -148,7 +148,7 @@ export default function GameScreen() {
                 DOWN: () => {
                     const msg = swipeInputMsg(
                         "down",
-                        globalS.getTickN(),
+                        globalData.getTickN(),
                         token.current,
                     );
                     socket.current?.send(binMsgIntoBytes(msg));
@@ -156,7 +156,7 @@ export default function GameScreen() {
                 LEFT: () => {
                     const msg = swipeInputMsg(
                         "left",
-                        globalS.getTickN(),
+                        globalData.getTickN(),
                         token.current,
                     );
                     socket.current?.send(binMsgIntoBytes(msg));
@@ -267,7 +267,7 @@ function diagonalSwipe(
     const gesture = Gesture.Fling();
     gesture.config.direction = Directions[dir1] | Directions[dir2];
     gesture.onEnd(() => {
-        if (globalS.getDirection(globalS.me()) === dir1) {
+        if (globalData.getDirection(globalData.me()) === dir1) {
             callbacks[dir2]();
         } else {
             callbacks[dir1]();

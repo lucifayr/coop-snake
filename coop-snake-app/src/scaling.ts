@@ -1,5 +1,5 @@
 import { assert } from "./assert";
-import { globalS } from "./stores/globalStore";
+import { globalData } from "./stores/globalStore";
 
 /**
  * Converts pixel value to percentage of grid size;
@@ -7,13 +7,13 @@ import { globalS } from "./stores/globalStore";
  */
 export function gridPosToPixels(gridPos: number, canvasSize: number): number {
     assert(
-        gridPos < globalS.getBoardSize(),
+        gridPos < globalData.getBoardSize(),
         `gridPos should be smaller than the size of the grid. Received ${gridPos}`,
     );
 
-    return (gridPos / globalS.getBoardSize()) * canvasSize;
+    return (gridPos / globalData.getBoardSize()) * canvasSize;
 }
 
 export function gridCellSize(canvasSize: number): number {
-    return (1 / globalS.getBoardSize()) * canvasSize;
+    return (1 / globalData.getBoardSize()) * canvasSize;
 }

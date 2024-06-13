@@ -1,5 +1,5 @@
 import { GameEntities } from "@/app/(tabs)/game";
-import { globalS } from "@/src/stores/globalStore";
+import { globalData } from "@/src/stores/globalStore";
 import { Canvas, Line } from "@shopify/react-native-skia";
 import { ReactElement } from "react";
 import { ScaledSize } from "react-native";
@@ -17,8 +17,8 @@ export function GameCanvas(
     // DefaultRendere as is
     const renderer = DefaultRenderer as any;
 
-    const lines = globalS.hasDebugFlag("show-grid-lines")
-        ? gridLines(globalS.getBoardSize(), layout?.width)
+    const lines = globalData.hasDebugFlag("show-grid-lines")
+        ? gridLines(globalData.getBoardSize(), layout?.width)
         : undefined;
 
     return (

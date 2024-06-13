@@ -24,7 +24,7 @@ const store = {
 
 type DebugFlag = "show-grid-lines";
 
-export const globalS = {
+export const globalData = {
     me,
     getTickN,
     setTickN,

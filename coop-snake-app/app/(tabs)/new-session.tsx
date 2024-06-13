@@ -5,7 +5,7 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 
 import { useForm, SubmitHandler, Controller } from "react-hook-form";
 import { SessionConfig, newSession } from "@/src/sessionConfig";
-import { globalS } from "@/src/stores/globalStore";
+import { globalData } from "@/src/stores/globalStore";
 
 type Input = {
     playerCount?: string;
@@ -49,7 +49,7 @@ export default function HighscoreScreen() {
         setLoading(false);
 
         if (key) {
-            globalS.setSessionKey(key);
+            globalData.setSessionKey(key);
             router.navigate("/game");
         } else {
             Alert.alert("Failed to create session");
