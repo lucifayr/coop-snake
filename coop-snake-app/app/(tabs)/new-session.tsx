@@ -1,11 +1,12 @@
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import { Alert, Button, StyleSheet, Text, TextInput, View } from "react-native";
+import { Alert, StyleSheet, Text, TextInput, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 import { useForm, SubmitHandler, Controller } from "react-hook-form";
 import { SessionConfig, newSession } from "@/src/sessionConfig";
 import { globalData } from "@/src/stores/globalStore";
+import Button from "@/components/Button";
 
 type Input = {
     teamName: "";
@@ -146,7 +147,7 @@ export default function HighscoreScreen() {
                     name="initialSnakeSize"
                 />
 
-                <Button title="Submit" onPress={handleSubmit(onSubmit)} />
+                <Button text="Submit" onClick={handleSubmit(onSubmit)} />
             </View>
         </KeyboardAwareScrollView>
     );
