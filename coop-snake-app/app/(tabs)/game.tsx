@@ -66,6 +66,7 @@ const {
 
 export default function GameScreen() {
     const [waitingFor, setWaitingFor] = useState(100_000);
+    const [score, setScore] = useState(0);
 
     const socket = useRef<WebSocket | undefined>(undefined);
     const token = useRef<number | undefined>(undefined);
@@ -139,6 +140,10 @@ export default function GameScreen() {
                     setWaitingFor(globalData.getPlayerCount());
                 }
 
+                if (info.type === "Score") {
+                    setScore(info.value);
+                }
+
                 if (info.type === "Restart" && info.kind === "confirmed") {
                     globalData.resetGameOver();
                     setWaitingFor(0);
@@ -169,13 +174,21 @@ export default function GameScreen() {
 
     if (waitingFor > 0) {
         return (
-            <WaitingForPlayers
-                sessionKey={globalData.getSessionKey() ?? "---"}
-                waitingFor={waitingFor}
-                ws={socket.current}
-                token={token.current}
-                isGameOver={globalData.getGameOverInfo().gameOver}
-            />
+            <WaitingFor>
+                {globalData.getGameOverInfo().gameOver ? (
+                    <WaitForRestart
+                        waitingFor={waitingFor}
+                        score={score}
+                        ws={socket.current!}
+                        token={token.current!}
+                    />
+                ) : (
+                    <WaitForJoin
+                        sessionKey={globalData.getSessionKey() ?? "---"}
+                        waitingFor={waitingFor}
+                    />
+                )}
+            </WaitingFor>
         );
     }
 
@@ -248,19 +261,7 @@ function GameScreenContainer({
     );
 }
 
-function WaitingForPlayers({
-    sessionKey,
-    waitingFor,
-    token,
-    ws,
-    isGameOver,
-}: {
-    sessionKey: string;
-    waitingFor: number;
-    ws: WebSocket | undefined;
-    token: number | undefined;
-    isGameOver: boolean;
-}) {
+function WaitingFor({ children }: { children: ReactNode }) {
     return (
         <View
             style={{
@@ -280,18 +281,7 @@ function WaitingForPlayers({
                     gap: 12,
                 }}
             >
-                {isGameOver ? (
-                    <WaitForRestart
-                        waitingFor={waitingFor}
-                        ws={ws}
-                        token={token}
-                    />
-                ) : (
-                    <WaitForJoin
-                        sessionKey={sessionKey}
-                        waitingFor={waitingFor}
-                    />
-                )}
+                {children}
             </View>
         </View>
     );
@@ -299,10 +289,12 @@ function WaitingForPlayers({
 
 function WaitForRestart({
     waitingFor,
+    score,
     ws,
     token,
 }: {
     waitingFor: number;
+    score: number;
     ws: WebSocket | undefined;
     token: number | undefined;
 }) {
@@ -341,18 +333,37 @@ function WaitForRestart({
     };
 
     return (
-        <>
+        <View style={{ gap: 42, alignItems: "center" }}>
             <View style={{ alignItems: "center" }}>
                 <Text
                     style={{
                         color: "#fff",
                         fontSize: 16,
-                        fontWeight: 900,
+                        fontWeight: 800,
                         paddingBottom: 12,
                     }}
                 >
                     Game Over
                 </Text>
+                <Text
+                    style={{
+                        color: "#fff",
+                        fontSize: 14,
+                    }}
+                >
+                    Score
+                </Text>
+                <Text
+                    style={{
+                        color: "#fff",
+                        fontSize: 20,
+                        fontWeight: 900,
+                    }}
+                >
+                    {score}
+                </Text>
+            </View>
+            <View style={{ alignItems: "center", gap: 4 }}>
                 <Text style={{ color: "#fff", fontSize: 14 }}>Try again?</Text>
                 <View
                     style={{
@@ -394,11 +405,11 @@ function WaitForRestart({
                         <Text style={{ color: "#fff" }}>No</Text>
                     </Pressable>
                 </View>
+                <Text style={{ color: "#fff", fontSize: 12 }}>
+                    Waiting for: {waitingFor}
+                </Text>
             </View>
-            <Text style={{ color: "#fff", fontSize: 12 }}>
-                Waiting for: {waitingFor}
-            </Text>
-        </>
+        </View>
     );
 }
 

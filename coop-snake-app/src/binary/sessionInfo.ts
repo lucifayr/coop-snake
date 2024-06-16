@@ -10,6 +10,7 @@ const SESSION_INFO_TYPES = {
     PlayerCount: 6,
     RestartConfirmed: 7,
     RestartDenied: 8,
+    Score: 9,
 } as const;
 
 const GAME_OVER_CAUSES = {
@@ -31,6 +32,7 @@ export type SessionInfo =
               | "PlayerId"
               | "WaitingFor"
               | "PlayerCount"
+              | "Score"
           >;
           value: number;
       }
