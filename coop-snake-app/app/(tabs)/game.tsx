@@ -19,7 +19,7 @@ import {
     binMsgIntoBytes,
 } from "@/src/binary/gameBinaryMessage";
 import { GameCanvas } from "@/components/Game/GameCanvas";
-import { useBuffer } from "@/src/binary/useBuffer";
+import { staticBuffer } from "@/src/binary/useBuffer";
 import {
     Gesture,
     Directions,
@@ -52,19 +52,22 @@ export type GameEntities = {
     };
 };
 
+const {
+    view: msgView,
+    writeCanonicalBytes: msgWriteCanonicalBytes,
+    reAllocateBuf: msgReAllocateBuf,
+} = staticBuffer(
+    globalData.getBoardSize() *
+        globalData.getBoardSize() *
+        COORDINATE_BYTE_WIDTH *
+        16,
+);
+
 export default function GameScreen() {
-    const [waitingFor, setWaitingFor] = useState(Number.MAX_VALUE);
+    const [waitingFor, setWaitingFor] = useState(100_000);
 
     const socket = useRef<WebSocket | undefined>(undefined);
     const token = useRef<number | undefined>(undefined);
-    const { view: msgView, writeCanonicalBytes: msgWriteCanonicalBytes } =
-        useBuffer(
-            globalData.getBoardSize() *
-                globalData.getBoardSize() *
-                COORDINATE_BYTE_WIDTH *
-                16,
-        );
-
     useEffect(() => {
         const url = `${process.env.EXPO_PUBLIC_WEBSOCKET_BASE_URL}/game/session/${globalData.getSessionKey()}`;
         const ws = new WebSocket(url);
@@ -103,6 +106,7 @@ export default function GameScreen() {
         };
 
         const onSessionInfo = (info: SessionInfo) => {
+            console.log(info);
             if (info.type === "PlayerId") {
                 globalData.setMe(info.value);
             }
@@ -113,6 +117,7 @@ export default function GameScreen() {
 
             if (info.type === "BoardSize") {
                 globalData.setBoardSize(info.value);
+                msgReAllocateBuf(info.value);
             }
 
             if (info.type === "WaitingFor") {
@@ -135,7 +140,7 @@ export default function GameScreen() {
             ws.removeEventListener("error", onErr);
             ws.close();
         };
-    }, [msgView, msgWriteCanonicalBytes]);
+    }, []);
 
     if (waitingFor > 0) {
         return (

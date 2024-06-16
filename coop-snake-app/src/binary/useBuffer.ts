@@ -8,7 +8,7 @@ export type BufferState = {
     reAllocateBuf: (capacity: number) => void;
 };
 
-export function useBuffer(capacity: number): BufferState {
+export function staticBuffer(capacity: number): BufferState {
     let obj = {
         bytes: new Uint8Array(capacity),
         canonicalLen: 0,
