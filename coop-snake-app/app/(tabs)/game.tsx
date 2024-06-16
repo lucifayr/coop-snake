@@ -3,7 +3,7 @@ import { GameLoop } from "@/src/gameLoop";
 import { COORDINATE_BYTE_WIDTH, Coordinate } from "@/src/binary/coordinate";
 import { AntDesign } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { ReactNode, useEffect, useRef } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import {
     Alert,
     Pressable,
@@ -53,6 +53,8 @@ export type GameEntities = {
 };
 
 export default function GameScreen() {
+    const [waitingFor, setWaitingFor] = useState(Number.MAX_VALUE);
+
     const socket = useRef<WebSocket | undefined>(undefined);
     const token = useRef<number | undefined>(undefined);
     const { view: msgView, writeCanonicalBytes: msgWriteCanonicalBytes } =
@@ -113,6 +115,10 @@ export default function GameScreen() {
                 globalData.setBoardSize(info.value);
             }
 
+            if (info.type === "WaitingFor") {
+                setWaitingFor(info.value);
+            }
+
             if (info.type === "GameOver") {
                 globalData.setGameOver(info.cause);
                 Alert.alert(`Game Over : ${info.cause}`);
@@ -130,6 +136,15 @@ export default function GameScreen() {
             ws.close();
         };
     }, [msgView, msgWriteCanonicalBytes]);
+
+    if (waitingFor > 0) {
+        return (
+            <WaitingForPlayers
+                sessionKey={globalData.getSessionKey() ?? "---"}
+                waitingFor={waitingFor}
+            />
+        );
+    }
 
     return (
         <GameScreenContainer
@@ -211,6 +226,53 @@ function GameScreenContainer({
                 </Pressable>
             </View>
         </GestureHandlerRootView>
+    );
+}
+
+function WaitingForPlayers({
+    sessionKey,
+    waitingFor,
+}: {
+    sessionKey: string;
+    waitingFor: number;
+}) {
+    return (
+        <View
+            style={{
+                flex: 1,
+                justifyContent: "center",
+                alignItems: "center",
+                backgroundColor: colors.bgDark,
+            }}
+        >
+            <View
+                style={{
+                    padding: 24,
+                    backgroundColor: colors.bg,
+                    borderRadius: 4,
+                    width: "50%",
+                    alignItems: "center",
+                    gap: 12,
+                }}
+            >
+                <View style={{ alignItems: "center" }}>
+                    <Text style={{ color: "#fff", fontSize: 12 }}>Key</Text>
+                    <Text
+                        selectable={true}
+                        style={{
+                            color: "#fff",
+                            fontWeight: 900,
+                            fontSize: 16,
+                        }}
+                    >
+                        {sessionKey}
+                    </Text>
+                </View>
+                <Text style={{ color: "#fff", fontSize: 12 }}>
+                    Waiting for: {waitingFor}
+                </Text>
+            </View>
+        </View>
     );
 }
 
