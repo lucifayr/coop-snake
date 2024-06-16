@@ -50,7 +50,7 @@ export default function HighscoreScreen() {
 
         if (key) {
             globalData.setSessionKey(key);
-            router.navigate("/game");
+            router.replace("/game");
         } else {
             Alert.alert("Failed to create session");
         }

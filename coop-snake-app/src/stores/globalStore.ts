@@ -3,8 +3,7 @@ import { Coordinate } from "../binary/coordinate";
 import { GameOverCause } from "../binary/sessionInfo";
 import { snakeSegmentDir } from "../binary/utils";
 
-// Internal store with default values
-const store = {
+const defaultValus = {
     tickN: 0,
     boardSize: 32,
     playerCount: 2,
@@ -24,11 +23,33 @@ const store = {
     },
 };
 
+function initStore(): typeof defaultValus {
+    return {
+        tickN: defaultValus.tickN,
+        boardSize: defaultValus.boardSize,
+        playerCount: defaultValus.playerCount,
+        sessionKey: defaultValus.sessionKey,
+        me: defaultValus.me,
+        gameState: {
+            gameOver: defaultValus.gameState.gameOver,
+            gameOverCause: defaultValus.gameState.gameOverCause,
+        },
+        coords: new Map(defaultValus.coords),
+        food: new Map(defaultValus.food),
+        debug: {
+            flags: defaultValus.debug.flags, // should never change
+        },
+    };
+}
+
+let store = initStore();
+
 type DebugFlag = "show-grid-lines";
 
 export type SnakeDirection = keyof typeof Directions;
 
 export const globalData = {
+    resetStore,
     me,
     setMe,
     getTickN,
@@ -45,9 +66,14 @@ export const globalData = {
     hasDebugFlag,
     getGameOverInfo,
     setGameOver,
+    resetGameOver,
     getSessionKey,
     setSessionKey,
 } as const;
+
+function resetStore() {
+    store = initStore();
+}
 
 function getTickN(): number {
     return store.tickN;
@@ -108,6 +134,10 @@ function setGameOver(cause: GameOverCause) {
     store.gameState.gameOverCause = cause;
 }
 
+function resetGameOver() {
+    store.gameState.gameOver = false;
+}
+
 function getDirection(player: number): SnakeDirection {
     const coords = store.coords.get(player);
     if (!coords) {
@@ -117,7 +147,7 @@ function getDirection(player: number): SnakeDirection {
     const p1 = coords[0];
     const p2 = coords[1];
 
-    return snakeSegmentDir(p1, p2);
+    return snakeSegmentDir(p1, p2, undefined);
 }
 
 function me(): number {

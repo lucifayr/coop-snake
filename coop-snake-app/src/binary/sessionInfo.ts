@@ -8,6 +8,8 @@ const SESSION_INFO_TYPES = {
     PlayerId: 4,
     WaitingFor: 5,
     PlayerCount: 6,
+    RestartConfirmed: 7,
+    RestartDenied: 8,
 } as const;
 
 const GAME_OVER_CAUSES = {
@@ -32,7 +34,8 @@ export type SessionInfo =
           >;
           value: number;
       }
-    | { type: "GameOver"; cause: GameOverCause };
+    | { type: "GameOver"; cause: GameOverCause }
+    | { type: "Restart"; kind: "confirmed" | "denied" };
 
 export function parseSessionInfoMsg(bytes: DataView): SessionInfo {
     const typeByte = bytes.getUint8(0);
@@ -41,6 +44,14 @@ export function parseSessionInfoMsg(bytes: DataView): SessionInfo {
         const byte = bytes.getUint8(1);
         const cause = constKeyFromValueMap(byte, GAME_OVER_CAUSES);
         return { type, cause };
+    }
+
+    if (type === "RestartConfirmed") {
+        return { type: "Restart", kind: "confirmed" };
+    }
+
+    if (type === "RestartDenied") {
+        return { type: "Restart", kind: "denied" };
     }
 
     const value = bytes.getUint32(1);

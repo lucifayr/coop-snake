@@ -1,9 +1,8 @@
 import { SnakeProperties } from "@/components/Game/Snake";
 import { GameLoop } from "@/src/gameLoop";
 import { COORDINATE_BYTE_WIDTH, Coordinate } from "@/src/binary/coordinate";
-import { AntDesign } from "@expo/vector-icons";
-import { router } from "expo-router";
-import { ReactNode, useEffect, useRef, useState } from "react";
+import { router, useFocusEffect } from "expo-router";
+import { ReactNode, useCallback, useRef, useState } from "react";
 import {
     Alert,
     Pressable,
@@ -16,6 +15,7 @@ import { GameEngine } from "react-native-game-engine";
 import { playerCoordsFromMsg } from "@/src/playerCoords";
 import {
     binMsgFromBytes,
+    binMsgFromData,
     binMsgIntoBytes,
 } from "@/src/binary/gameBinaryMessage";
 import { GameCanvas } from "@/components/Game/GameCanvas";
@@ -34,6 +34,7 @@ import { SessionInfo, parseSessionInfoMsg } from "@/src/binary/sessionInfo";
 import { foodCoordFromMsg } from "@/src/foodCoords";
 import { FoodProperties } from "@/components/Game/Food";
 import { colors } from "@/src/colors";
+import { u32ToBytes } from "@/src/binary/utils";
 
 export type GameEntities = {
     players: {
@@ -68,90 +69,112 @@ export default function GameScreen() {
 
     const socket = useRef<WebSocket | undefined>(undefined);
     const token = useRef<number | undefined>(undefined);
-    useEffect(() => {
-        const url = `${process.env.EXPO_PUBLIC_WEBSOCKET_BASE_URL}/game/session/${globalData.getSessionKey()}`;
-        const ws = new WebSocket(url);
+    useFocusEffect(
+        useCallback(() => {
+            const url = `${process.env.EXPO_PUBLIC_WEBSOCKET_BASE_URL}/game/session/${globalData.getSessionKey()}`;
+            const ws = new WebSocket(url);
 
-        const onErr = (e: WebSocketMessageEvent) => {
-            console.error("WebSocket error:", e);
-        };
+            const onErr = (e: WebSocketMessageEvent) => {
+                console.error("WebSocket error:", e);
+            };
 
-        const onMsg = (e: WebSocketMessageEvent) => {
-            const data = e.data;
-            const isBinary = data instanceof ArrayBuffer;
-            if (isBinary) {
-                onBinMsg(data);
-            }
-        };
+            const onMsg = (e: WebSocketMessageEvent) => {
+                const data = e.data;
+                const isBinary = data instanceof ArrayBuffer;
+                if (isBinary) {
+                    onBinMsg(data);
+                }
+            };
 
-        const onBinMsg = (data: ArrayBuffer) => {
-            msgWriteCanonicalBytes(new DataView(data));
-            const msg = binMsgFromBytes(msgView());
+            const onBinMsg = (data: ArrayBuffer) => {
+                msgWriteCanonicalBytes(new DataView(data));
+                const msg = binMsgFromBytes(msgView());
 
-            if (msg.messageType === "SessionInfo") {
-                const info = parseSessionInfoMsg(msg.data);
-                onSessionInfo(info);
-            }
+                if (msg.messageType === "SessionInfo") {
+                    const info = parseSessionInfoMsg(msg.data);
+                    onSessionInfo(info);
+                }
 
-            if (msg.messageType === "PlayerPosition") {
-                const playerCoords = playerCoordsFromMsg(msg);
-                globalData.setTickN(playerCoords.tickN);
-                globalData.setCoords(playerCoords.player, playerCoords.coords);
-            }
+                if (msg.messageType === "PlayerPosition") {
+                    const playerCoords = playerCoordsFromMsg(msg);
+                    globalData.setTickN(playerCoords.tickN);
+                    globalData.setCoords(
+                        playerCoords.player,
+                        playerCoords.coords,
+                    );
+                }
 
-            if (msg.messageType === "FoodPosition") {
-                const foodCoord = foodCoordFromMsg(msg);
-                globalData.setFood(foodCoord.player, foodCoord.coord);
-            }
-        };
+                if (msg.messageType === "FoodPosition") {
+                    const foodCoord = foodCoordFromMsg(msg);
+                    globalData.setFood(foodCoord.player, foodCoord.coord);
+                }
+            };
 
-        const onSessionInfo = (info: SessionInfo) => {
-            if (info.type === "PlayerId") {
-                globalData.setMe(info.value);
-            }
+            const onSessionInfo = (info: SessionInfo) => {
+                if (info.type === "PlayerId") {
+                    globalData.setMe(info.value);
+                }
 
-            if (info.type === "PlayerToken") {
-                token.current = info.value;
-            }
+                if (info.type === "PlayerToken") {
+                    token.current = info.value;
+                }
 
-            if (info.type === "PlayerCount") {
-                globalData.setPlayerCount(info.value);
-            }
+                if (info.type === "PlayerCount") {
+                    globalData.setPlayerCount(info.value);
+                }
 
-            if (info.type === "BoardSize") {
-                globalData.setBoardSize(info.value);
-                const bufSize =
-                    info.value * info.value * COORDINATE_BYTE_WIDTH * 16;
-                msgReAllocateBuf(bufSize);
-            }
+                if (info.type === "BoardSize") {
+                    globalData.setBoardSize(info.value);
+                    const bufSize =
+                        info.value * info.value * COORDINATE_BYTE_WIDTH * 16;
+                    msgReAllocateBuf(bufSize);
+                }
 
-            if (info.type === "WaitingFor") {
-                setWaitingFor(info.value);
-            }
+                if (info.type === "WaitingFor") {
+                    setWaitingFor(info.value);
+                }
 
-            if (info.type === "GameOver") {
-                globalData.setGameOver(info.cause);
-                Alert.alert(`Game Over : ${info.cause}`);
-            }
-        };
+                if (info.type === "GameOver") {
+                    globalData.setGameOver(info.cause);
+                    setWaitingFor(globalData.getPlayerCount());
+                }
 
-        ws.addEventListener("message", onMsg);
-        ws.addEventListener("error", onErr);
+                if (info.type === "Restart" && info.kind === "confirmed") {
+                    globalData.resetGameOver();
+                    setWaitingFor(0);
+                }
 
-        socket.current = ws;
+                if (info.type === "Restart" && info.kind === "denied") {
+                    Alert.alert(
+                        "Closing Session",
+                        "Not all players wanted play again",
+                    );
 
-        return () => {
-            ws.removeEventListener("message", onMsg);
-            ws.removeEventListener("error", onErr);
-            ws.close();
-        };
-    }, []);
+                    router.replace("/home");
+                }
+            };
+
+            ws.addEventListener("message", onMsg);
+            ws.addEventListener("error", onErr);
+
+            socket.current = ws;
+
+            return () => {
+                ws.removeEventListener("message", onMsg);
+                ws.removeEventListener("error", onErr);
+                ws.close();
+            };
+        }, []),
+    );
 
     if (waitingFor > 0) {
         return (
             <WaitingForPlayers
                 sessionKey={globalData.getSessionKey() ?? "---"}
                 waitingFor={waitingFor}
+                ws={socket.current}
+                token={token.current}
+                isGameOver={globalData.getGameOverInfo().gameOver}
             />
         );
     }
@@ -220,20 +243,6 @@ function GameScreenContainer({
                         <View style={styles.gamepane}>{children}</View>
                     </View>
                 </GestureDetector>
-
-                <Pressable
-                    style={{
-                        display: "flex",
-                        flexWrap: "nowrap",
-                        flexDirection: "row",
-                        marginLeft: 40,
-                        width: "100%",
-                    }}
-                    onPress={() => router.navigate("/home")}
-                >
-                    <AntDesign name="caretleft" size={24} color="white" />
-                    <Text style={{ color: "white", fontSize: 20 }}>Back</Text>
-                </Pressable>
             </View>
         </GestureHandlerRootView>
     );
@@ -242,9 +251,15 @@ function GameScreenContainer({
 function WaitingForPlayers({
     sessionKey,
     waitingFor,
+    token,
+    ws,
+    isGameOver,
 }: {
     sessionKey: string;
     waitingFor: number;
+    ws: WebSocket | undefined;
+    token: number | undefined;
+    isGameOver: boolean;
 }) {
     return (
         <View
@@ -265,24 +280,154 @@ function WaitingForPlayers({
                     gap: 12,
                 }}
             >
-                <View style={{ alignItems: "center" }}>
-                    <Text style={{ color: "#fff", fontSize: 12 }}>Key</Text>
-                    <Text
-                        selectable={true}
-                        style={{
-                            color: "#fff",
-                            fontWeight: 900,
-                            fontSize: 16,
-                        }}
-                    >
-                        {sessionKey}
-                    </Text>
-                </View>
-                <Text style={{ color: "#fff", fontSize: 12 }}>
-                    Waiting for: {waitingFor}
-                </Text>
+                {isGameOver ? (
+                    <WaitForRestart
+                        waitingFor={waitingFor}
+                        ws={ws}
+                        token={token}
+                    />
+                ) : (
+                    <WaitForJoin
+                        sessionKey={sessionKey}
+                        waitingFor={waitingFor}
+                    />
+                )}
             </View>
         </View>
+    );
+}
+
+function WaitForRestart({
+    waitingFor,
+    ws,
+    token,
+}: {
+    waitingFor: number;
+    ws: WebSocket | undefined;
+    token: number | undefined;
+}) {
+    const [choice, setChoice] = useState<"confirm" | "deny" | undefined>(
+        undefined,
+    );
+
+    const confirm = () => {
+        if (choice || !ws || !token) {
+            return;
+        }
+
+        setChoice("confirm");
+        const tokenBytes = u32ToBytes(token);
+        const msg = binMsgFromData(
+            "PlayerRestartConfirm",
+            new DataView(Uint8Array.of(...tokenBytes).buffer),
+        );
+
+        ws.send(binMsgIntoBytes(msg));
+    };
+
+    const deny = () => {
+        if (choice || !ws || !token) {
+            return;
+        }
+
+        setChoice("deny");
+        const tokenBytes = u32ToBytes(token);
+        const msg = binMsgFromData(
+            "PlayerRestartDeny",
+            new DataView(Uint8Array.of(...tokenBytes).buffer),
+        );
+
+        ws.send(binMsgIntoBytes(msg));
+    };
+
+    return (
+        <>
+            <View style={{ alignItems: "center" }}>
+                <Text
+                    style={{
+                        color: "#fff",
+                        fontSize: 16,
+                        fontWeight: 900,
+                        paddingBottom: 12,
+                    }}
+                >
+                    Game Over
+                </Text>
+                <Text style={{ color: "#fff", fontSize: 14 }}>Try again?</Text>
+                <View
+                    style={{
+                        width: "100%",
+                        flexDirection: "row",
+                        justifyContent: "space-between",
+                        gap: 12,
+                        padding: 4,
+                    }}
+                >
+                    <Pressable
+                        onPress={() => confirm()}
+                        disabled={choice !== undefined}
+                        style={{
+                            backgroundColor:
+                                choice === "deny"
+                                    ? colors.disabled
+                                    : colors.confirm,
+                            width: "50%",
+                            padding: 8,
+                            alignItems: "center",
+                        }}
+                    >
+                        <Text style={{ color: "#fff" }}>Yes</Text>
+                    </Pressable>
+                    <Pressable
+                        onPress={() => deny()}
+                        disabled={choice !== undefined}
+                        style={{
+                            backgroundColor:
+                                choice === "confirm"
+                                    ? colors.disabled
+                                    : colors.deny,
+                            width: "50%",
+                            padding: 8,
+                            alignItems: "center",
+                        }}
+                    >
+                        <Text style={{ color: "#fff" }}>No</Text>
+                    </Pressable>
+                </View>
+            </View>
+            <Text style={{ color: "#fff", fontSize: 12 }}>
+                Waiting for: {waitingFor}
+            </Text>
+        </>
+    );
+}
+
+function WaitForJoin({
+    sessionKey,
+    waitingFor,
+}: {
+    sessionKey: string;
+    waitingFor: number;
+}) {
+    return (
+        <>
+            <View style={{ alignItems: "center" }}>
+                <Text style={{ color: "#fff", fontSize: 12 }}>Key</Text>
+                <Text
+                    selectable={true}
+                    style={{
+                        color: "#fff",
+                        fontWeight: 900,
+                        fontSize: 16,
+                    }}
+                >
+                    {sessionKey}
+                </Text>
+            </View>
+            <Text style={{ color: "#fff", fontSize: 12 }}>
+                Waiting for: {waitingFor}
+            </Text>
+        </>
     );
 }
 

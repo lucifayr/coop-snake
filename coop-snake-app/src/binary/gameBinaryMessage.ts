@@ -19,6 +19,18 @@ const MESSAGE_HEADER_WIDTH_VERSION = 1;
 const MESSAGE_HEADER_WIDTH_TYPE = 4;
 const MESSAGE_HEADER_WIDTH_DATA_LENGTH = 4;
 
+export function binMsgFromData(
+    type: GameMessageType,
+    data: DataView,
+): GameBinaryMessage {
+    return {
+        version: MESSAGE_VERSION,
+        dataLength: data.byteLength,
+        messageType: type,
+        data,
+    };
+}
+
 export function binMsgIntoBytes(msg: GameBinaryMessage): Uint8Array {
     return Uint8Array.of(
         ...[
