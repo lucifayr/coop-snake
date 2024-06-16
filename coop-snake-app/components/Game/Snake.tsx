@@ -165,11 +165,10 @@ export function Snake(props: SnakeProperties) {
 
         const size = gridCellSize(canvasWidth);
         return (
-            <>
+            <Group key={idx}>
                 {props.playerId === globalData.me() && (
                     <RoundedRect
                         r={2}
-                        key={idx + props.coords.length}
                         color={colors.playerHighlight}
                         width={size}
                         height={size}
@@ -178,7 +177,6 @@ export function Snake(props: SnakeProperties) {
                     />
                 )}
                 <Image
-                    key={idx}
                     image={sprites[sprite]}
                     fit="cover"
                     width={size}
@@ -186,7 +184,7 @@ export function Snake(props: SnakeProperties) {
                     x={xPos}
                     y={yPos}
                 />
-            </>
+            </Group>
         );
     });
 

@@ -1,4 +1,5 @@
 export type SessionConfig = {
+    teamName: string;
     initialSnakeSize?: number;
     boardSize?: number;
     playerCount?: number;

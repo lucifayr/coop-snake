@@ -8,6 +8,7 @@ import { SessionConfig, newSession } from "@/src/sessionConfig";
 import { globalData } from "@/src/stores/globalStore";
 
 type Input = {
+    teamName: "";
     playerCount?: string;
     boardSize?: string;
     initialSnakeSize?: string;
@@ -17,8 +18,10 @@ export default function HighscoreScreen() {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
 
+    // TODO: form validation
     const { control, handleSubmit } = useForm<Input>({
         defaultValues: {
+            teamName: "",
             playerCount: "2",
             boardSize: "32",
             initialSnakeSize: "3",
@@ -37,6 +40,7 @@ export default function HighscoreScreen() {
         const initialSnakeSize = parseInt(data.initialSnakeSize ?? "");
 
         const config: SessionConfig = {
+            teamName: data.teamName,
             playerCount: Number.isNaN(playerCount) ? undefined : playerCount,
             boardSize: Number.isNaN(boardSize) ? undefined : boardSize,
             initialSnakeSize: Number.isNaN(initialSnakeSize)
@@ -59,6 +63,26 @@ export default function HighscoreScreen() {
     return (
         <KeyboardAwareScrollView contentContainerStyle={styles.container}>
             <View>
+                <Controller
+                    control={control}
+                    rules={{
+                        minLength: 1,
+                        maxLength: 255,
+                    }}
+                    render={({ field: { onChange, onBlur, value } }) => (
+                        <View style={styles.inputContainer}>
+                            <Text>Team name</Text>
+                            <TextInput
+                                style={styles.input}
+                                placeholder="name..."
+                                onBlur={onBlur}
+                                onChangeText={onChange}
+                                value={value}
+                            />
+                        </View>
+                    )}
+                    name="teamName"
+                />
                 <Controller
                     control={control}
                     rules={{

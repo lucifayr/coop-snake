@@ -1,5 +1,7 @@
 import { SnakeDirection } from "../stores/globalStore";
 import { Coordinate } from "./coordinate";
+import React from "react";
+import { useFocusEffect } from "@react-navigation/native";
 
 export function viewSlice(
     view: DataView,
@@ -27,6 +29,21 @@ export function u32ToBytes(value: number): Uint8Array {
     }
 
     return buf;
+}
+
+export function useRefreshOnFocus<T>(refetch: () => Promise<T>) {
+    const firstTimeRef = React.useRef(true);
+
+    useFocusEffect(
+        React.useCallback(() => {
+            if (firstTimeRef.current) {
+                firstTimeRef.current = false;
+                return;
+            }
+
+            refetch();
+        }, [refetch]),
+    );
 }
 
 // TODO: handle wrapping properly
