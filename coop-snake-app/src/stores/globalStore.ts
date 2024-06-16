@@ -1,6 +1,7 @@
 import { Directions } from "react-native-gesture-handler";
 import { Coordinate } from "../binary/coordinate";
 import { GameOverCause } from "../binary/sessionInfo";
+import { snakeSegmentDir } from "../binary/utils";
 
 // Internal store with default values
 const store = {
@@ -24,6 +25,8 @@ const store = {
 };
 
 type DebugFlag = "show-grid-lines";
+
+export type SnakeDirection = keyof typeof Directions;
 
 export const globalData = {
     me,
@@ -105,7 +108,7 @@ function setGameOver(cause: GameOverCause) {
     store.gameState.gameOverCause = cause;
 }
 
-function getDirection(player: number): keyof typeof Directions {
+function getDirection(player: number): SnakeDirection {
     const coords = store.coords.get(player);
     if (!coords) {
         return "RIGHT";
@@ -114,24 +117,7 @@ function getDirection(player: number): keyof typeof Directions {
     const p1 = coords[0];
     const p2 = coords[1];
 
-    const dx = p1?.x - p2?.x;
-    if (dx === 1) {
-        return "RIGHT";
-    }
-    if (dx === -1) {
-        return "LEFT";
-    }
-
-    const dy = p1?.y - p2?.y;
-    if (dy === 1) {
-        return "DOWN";
-    }
-    if (dy === -1) {
-        return "UP";
-    }
-
-    // fallback
-    return "RIGHT";
+    return snakeSegmentDir(p1, p2);
 }
 
 function me(): number {

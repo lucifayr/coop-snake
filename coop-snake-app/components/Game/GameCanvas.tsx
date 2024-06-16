@@ -1,4 +1,5 @@
 import { GameEntities } from "@/app/(tabs)/game";
+import { colors } from "@/src/colors";
 import { globalData } from "@/src/stores/globalStore";
 import { Canvas, Line } from "@shopify/react-native-skia";
 import { ReactElement } from "react";
@@ -46,7 +47,14 @@ function gridLines(
         const y1 = yP * canvasWidthPx;
         const y2 = yP * canvasWidthPx;
 
-        return <Line key={idx} p1={{ x: x1, y: y1 }} p2={{ x: x2, y: y2 }} />;
+        return (
+            <Line
+                key={idx}
+                color={colors.gameBorders}
+                p1={{ x: x1, y: y1 }}
+                p2={{ x: x2, y: y2 }}
+            />
+        );
     });
 
     const vlines = new Array(boardSize - 1).fill(0).map((_, idx) => {
@@ -60,6 +68,7 @@ function gridLines(
         return (
             <Line
                 key={idx + boardSize}
+                color={colors.gameBorders}
                 p1={{ x: x1, y: y1 }}
                 p2={{ x: x2, y: y2 }}
             />

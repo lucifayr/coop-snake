@@ -1,3 +1,6 @@
+import { SnakeDirection } from "../stores/globalStore";
+import { Coordinate } from "./coordinate";
+
 export function viewSlice(
     view: DataView,
     offset: number,
@@ -24,6 +27,32 @@ export function u32ToBytes(value: number): Uint8Array {
     }
 
     return buf;
+}
+
+// TODO: handle wrapping properly
+export function snakeSegmentDir(
+    s1: Coordinate,
+    s2: Coordinate,
+    prevDir: SnakeDirection | undefined,
+): SnakeDirection {
+    const dx = Math.round(s1?.x - s2?.x);
+    if (dx === 1) {
+        return "RIGHT";
+    }
+    if (dx === -1) {
+        return "LEFT";
+    }
+
+    const dy = Math.round(s1?.y - s2?.y);
+    if (dy === 1) {
+        return "DOWN";
+    }
+    if (dy === -1) {
+        return "UP";
+    }
+
+    // fallback
+    return prevDir ?? "RIGHT";
 }
 
 export function constKeyFromValueMap<O extends { [key: string]: number }>(

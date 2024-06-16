@@ -33,6 +33,7 @@ import { swipeInputMsg } from "@/src/binary/swipe";
 import { SessionInfo, parseSessionInfoMsg } from "@/src/binary/sessionInfo";
 import { foodCoordFromMsg } from "@/src/foodCoords";
 import { FoodProperties } from "@/components/Game/Food";
+import { colors } from "@/src/colors";
 
 export type GameEntities = {
     players: {
@@ -284,7 +285,7 @@ function diagonalSwipe(
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#EBAB9D",
+        backgroundColor: "#27272a",
         justifyContent: "space-around",
         alignItems: "center",
         // hacky spacing, feel free to change when adding more elements
@@ -296,7 +297,7 @@ const styles = StyleSheet.create({
         aspectRatio: 1,
         height: undefined,
         flex: undefined,
-        borderColor: "black",
+        borderColor: colors.gameBorders,
         borderStyle: "solid",
         borderWidth: 2,
         borderRadius: 10,

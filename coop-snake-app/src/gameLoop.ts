@@ -32,6 +32,7 @@ export const GameLoop = (entities: GameEntities): GameEntities => {
             entities.foods[i] = {
                 playerId: i,
                 coord: foodCoord,
+
                 renderer: Food,
             };
         } else {

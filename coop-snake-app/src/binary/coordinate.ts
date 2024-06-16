@@ -1,5 +1,4 @@
 import { assert } from "../assert";
-import { batch } from "../logging";
 
 export type Coordinate = {
     x: number;
@@ -31,36 +30,4 @@ export function coordsArrayFromBytes(bytes: DataView): Coordinate[] {
     }
 
     return coords;
-}
-
-export function validateCoords(coords: Coordinate[]) {
-    const batchLogger = batch(10, "warn");
-
-    for (let i = 1; i < coords.length; i++) {
-        const current = coords[i];
-        const prev = coords[i - 1];
-
-        const isDuplicate = current.x === prev.x && current.y === prev.y;
-        if (isDuplicate) {
-            batchLogger.add(
-                `INVALID COORINATE LIST: duplicate coordinate.
-pos1 ${JSON.stringify(prev)}
-pos2 ${JSON.stringify(current)}`,
-            );
-        }
-
-        const dx = current.x - prev.x;
-        const dy = current.x - prev.x;
-        const isDiscontinues = Math.abs(dx) > 1 || Math.abs(dy) > 1;
-
-        if (isDiscontinues) {
-            batchLogger.add(
-                `INVALID COORINATE LIST: coordinates are discontinues.
-pos1 ${JSON.stringify(prev)}
-pos2 ${JSON.stringify(current)}`,
-            );
-        }
-    }
-
-    batchLogger.flush();
 }

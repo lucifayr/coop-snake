@@ -1,9 +1,5 @@
 import { assert } from "./assert";
-import {
-    Coordinate,
-    coordsArrayFromBytes,
-    validateCoords,
-} from "./binary/coordinate";
+import { Coordinate, coordsArrayFromBytes } from "./binary/coordinate";
 import { GameBinaryMessage } from "./binary/gameBinaryMessage";
 import { viewSlice } from "./binary/utils";
 
@@ -25,8 +21,6 @@ export function playerCoordsFromMsg(msg: GameBinaryMessage): PlayerCoordinates {
     const coords = coordsArrayFromBytes(
         viewSlice(msg.data, dataOffset, msg.data.byteLength - dataOffset),
     );
-
-    validateCoords(coords);
 
     return { player, tickN, coords };
 }
