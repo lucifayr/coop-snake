@@ -7,6 +7,7 @@ const SESSION_INFO_TYPES = {
     GameOver: 3,
     PlayerId: 4,
     WaitingFor: 5,
+    PlayerCount: 6,
 } as const;
 
 const GAME_OVER_CAUSES = {
@@ -27,6 +28,7 @@ export type SessionInfo =
               | "BoardSize"
               | "PlayerId"
               | "WaitingFor"
+              | "PlayerCount"
           >;
           value: number;
       }

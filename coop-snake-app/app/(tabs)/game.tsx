@@ -106,7 +106,6 @@ export default function GameScreen() {
         };
 
         const onSessionInfo = (info: SessionInfo) => {
-            console.log(info);
             if (info.type === "PlayerId") {
                 globalData.setMe(info.value);
             }
@@ -115,9 +114,15 @@ export default function GameScreen() {
                 token.current = info.value;
             }
 
+            if (info.type === "PlayerCount") {
+                globalData.setPlayerCount(info.value);
+            }
+
             if (info.type === "BoardSize") {
                 globalData.setBoardSize(info.value);
-                msgReAllocateBuf(info.value);
+                const bufSize =
+                    info.value * info.value * COORDINATE_BYTE_WIDTH * 16;
+                msgReAllocateBuf(bufSize);
             }
 
             if (info.type === "WaitingFor") {
