@@ -1,6 +1,7 @@
 import { assert } from "@/src/assert";
 import { Coordinate } from "@/src/binary/coordinate";
 import {
+    ColorMatrix,
     Group,
     Image,
     RoundedRect,
@@ -10,7 +11,7 @@ import {
 import { gridPosToPixels, gridCellSize } from "@/src/scaling";
 import { snakeSegmentDir } from "@/src/binary/utils";
 import { GameContextApi, SnakeDirection } from "@/src/context/gameContext";
-import { colors } from "@/src/colors";
+import { colors, getSnakeColorMatrix } from "@/src/colors";
 
 export type SnakeProperties = {
     ctx: GameContextApi;
@@ -140,6 +141,10 @@ function pickSegmentImage(
 
 export function Snake(props: SnakeProperties) {
     const sprites = useSprites();
+    const colorMatrix = getSnakeColorMatrix(
+        props.playerId,
+        props.ctx.getSessionKey(),
+    );
 
     assert(
         Array.isArray(props.coords),
@@ -192,7 +197,9 @@ export function Snake(props: SnakeProperties) {
                     height={size}
                     x={xPos}
                     y={yPos}
-                />
+                >
+                    <ColorMatrix matrix={colorMatrix} />
+                </Image>
             </Group>
         );
     });
