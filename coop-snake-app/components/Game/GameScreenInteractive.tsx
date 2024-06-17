@@ -13,7 +13,7 @@ import {
     FlingGesture,
     Gesture,
 } from "react-native-gesture-handler";
-import GameRenderer from "./GameRenderer";
+import { GameRenderer, useRenderer } from "./GameRenderer";
 import { router, useFocusEffect } from "expo-router";
 import { SessionInfo } from "@/src/binary/sessionInfo";
 import { COORDINATE_BYTE_WIDTH } from "@/src/binary/coordinate";
@@ -23,23 +23,9 @@ import { swipeInputMsg } from "@/src/binary/swipe";
 export function GameScreenInteractive() {
     const [waitingFor, setWaitingFor] = useState(100_000);
     const [score, setScore] = useState(0);
+    const [socket, setSocket] = useState<WebSocket | undefined>(undefined);
 
-    const socket = useRef<WebSocket | undefined>(undefined);
     const token = useRef<number | undefined>(undefined);
-
-    useFocusEffect(
-        useCallback(() => {
-            const url = `${process.env.EXPO_PUBLIC_WEBSOCKET_BASE_URL}/game/session/${globalData.getSessionKey()}`;
-            const ws = new WebSocket(url);
-            ws.binaryType = "arraybuffer";
-
-            socket.current = ws;
-
-            return () => {
-                socket.current?.close();
-            };
-        }, []),
-    );
 
     const onSessionInfo = useCallback((info: SessionInfo, buf: BufferState) => {
         if (info.type === "PlayerId") {
@@ -85,6 +71,21 @@ export function GameScreenInteractive() {
         }
     }, []);
 
+    useRenderer(socket, onSessionInfo);
+
+    useFocusEffect(
+        useCallback(() => {
+            const url = `${process.env.EXPO_PUBLIC_WEBSOCKET_BASE_URL}/game/session/${globalData.getSessionKey()}`;
+            const ws = new WebSocket(url);
+            ws.binaryType = "arraybuffer";
+
+            setSocket(ws);
+            return () => {
+                ws.close();
+            };
+        }, []),
+    );
+
     if (waitingFor > 0) {
         return (
             <WaitingFor>
@@ -92,7 +93,7 @@ export function GameScreenInteractive() {
                     <WaitForRestart
                         waitingFor={waitingFor}
                         score={score}
-                        ws={socket.current!}
+                        ws={socket!}
                         token={token.current!}
                     />
                 ) : (
@@ -107,8 +108,6 @@ export function GameScreenInteractive() {
 
     return (
         <GameRenderer
-            ws={socket.current}
-            onSessionInfo={onSessionInfo}
             onSwipe={swipeGestures({
                 UP: () => {
                     const msg = swipeInputMsg(
@@ -116,7 +115,7 @@ export function GameScreenInteractive() {
                         globalData.getTickN(),
                         token.current,
                     );
-                    socket.current?.send(binMsgIntoBytes(msg));
+                    socket?.send(binMsgIntoBytes(msg));
                 },
                 RIGHT: () => {
                     const msg = swipeInputMsg(
@@ -124,7 +123,7 @@ export function GameScreenInteractive() {
                         globalData.getTickN(),
                         token.current,
                     );
-                    socket.current?.send(binMsgIntoBytes(msg));
+                    socket?.send(binMsgIntoBytes(msg));
                 },
                 DOWN: () => {
                     const msg = swipeInputMsg(
@@ -132,7 +131,7 @@ export function GameScreenInteractive() {
                         globalData.getTickN(),
                         token.current,
                     );
-                    socket.current?.send(binMsgIntoBytes(msg));
+                    socket?.send(binMsgIntoBytes(msg));
                 },
                 LEFT: () => {
                     const msg = swipeInputMsg(
@@ -140,7 +139,7 @@ export function GameScreenInteractive() {
                         globalData.getTickN(),
                         token.current,
                     );
-                    socket.current?.send(binMsgIntoBytes(msg));
+                    socket?.send(binMsgIntoBytes(msg));
                 },
             })}
         />

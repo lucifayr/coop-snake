@@ -44,15 +44,10 @@ const staticBuf = staticBuffer(
         16,
 );
 
-export default function GameRenderer({
-    ws,
-    onSessionInfo,
-    onSwipe,
-}: {
-    ws: WebSocket | undefined;
-    onSessionInfo: (info: SessionInfo, buf: BufferState) => void;
-    onSwipe: ComposedGesture;
-}) {
+export function useRenderer(
+    ws: WebSocket | undefined,
+    onSessionInfo: (info: SessionInfo, buf: BufferState) => void,
+) {
     useFocusEffect(
         useCallback(() => {
             const onErr = (e: WebSocketMessageEvent) => {
@@ -100,7 +95,9 @@ export default function GameRenderer({
             };
         }, [ws, onSessionInfo]),
     );
+}
 
+export function GameRenderer({ onSwipe }: { onSwipe: ComposedGesture }) {
     return (
         <GameScreenContainer onSwipe={onSwipe}>
             <GameEngine
