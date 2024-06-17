@@ -1,7 +1,7 @@
 import Button from "@/components/Button";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
     Button as Btn,
     ImageBackground,
@@ -16,6 +16,7 @@ export default function HomeScreen() {
     const headerHeight = useHeaderHeight();
     const router = useRouter();
 
+    const sessionKey = useRef("");
     const [isModalVisible, setIsModalVisible] = useState(false);
     const handleModal = () => setIsModalVisible(() => !isModalVisible);
 
@@ -54,13 +55,16 @@ export default function HomeScreen() {
                         placeholder="000000"
                         maxLength={6}
                         onChangeText={(text) => {
-                            router.setParams({ sessionKey: text });
+                            sessionKey.current = text;
                         }}
                     />
                     <Button
                         onClick={() => {
                             setIsModalVisible(false);
-                            router.replace("/game");
+                            router.replace({
+                                pathname: "/game",
+                                params: { sessionKey: sessionKey.current },
+                            });
                         }}
                         text="Join"
                     ></Button>

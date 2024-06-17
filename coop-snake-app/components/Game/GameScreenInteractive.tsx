@@ -25,6 +25,7 @@ export function GameScreenInteractive() {
     const [waitingFor, setWaitingFor] = useState(100_000);
     const [score, setScore] = useState(0);
     const [socket, setSocket] = useState<WebSocket | undefined>(undefined);
+    const [renderedKey, setRenderedKey] = useState(ctx.getSessionKey());
 
     const token = useRef<number | undefined>(undefined);
 
@@ -76,11 +77,13 @@ export function GameScreenInteractive() {
 
     useFocusEffect(
         useCallback(() => {
-            const url = `${process.env.EXPO_PUBLIC_WEBSOCKET_BASE_URL}/game/session/${ctx.getSessionKey()}`;
+            const key = ctx.getSessionKey();
+            const url = `${process.env.EXPO_PUBLIC_WEBSOCKET_BASE_URL}/game/session/${key}`;
             const ws = new WebSocket(url);
             ws.binaryType = "arraybuffer";
 
             setSocket(ws);
+            setRenderedKey(key);
             return () => {
                 ws.close();
             };
@@ -99,7 +102,7 @@ export function GameScreenInteractive() {
                     />
                 ) : (
                     <WaitForJoin
-                        sessionKey={ctx.getSessionKey() ?? "---"}
+                        sessionKey={renderedKey ?? "---"}
                         waitingFor={waitingFor}
                     />
                 )}

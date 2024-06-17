@@ -2,7 +2,7 @@ import { Directions } from "react-native-gesture-handler";
 import { Coordinate } from "../binary/coordinate";
 import { GameOverCause } from "../binary/sessionInfo";
 import { snakeSegmentDir } from "../binary/utils";
-import { ReactNode, createContext, useCallback } from "react";
+import { ReactNode, createContext, useCallback, useMemo } from "react";
 import { useFocusEffect } from "expo-router";
 
 export type GameContextApi = ReturnType<typeof initContext>;
@@ -38,11 +38,12 @@ export function GameContextProvider({
     children: ReactNode;
     sessionKey: string | undefined;
 }) {
-    const ctx = initContext();
+    const ctx = useMemo(() => initContext(), []);
 
     useFocusEffect(
         useCallback(() => {
             ctx.resetStore();
+            ctx.setSessionKey(sessionKey);
         }, []),
     );
 
