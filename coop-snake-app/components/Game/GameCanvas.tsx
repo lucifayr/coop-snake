@@ -5,7 +5,7 @@ import { ReactElement } from "react";
 import { ScaledSize } from "react-native";
 
 import { DefaultRenderer } from "react-native-game-engine";
-import { GameEntities } from "./GameScreenInternal";
+import { GameEntities } from "./GameRenderer";
 
 export function GameCanvas(
     entities: GameEntities,

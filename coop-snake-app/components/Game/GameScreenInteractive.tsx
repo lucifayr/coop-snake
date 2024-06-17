@@ -1,177 +1,89 @@
-import { SnakeProperties } from "@/components/Game/Snake";
-import { GameLoop } from "@/src/gameLoop";
-import { COORDINATE_BYTE_WIDTH, Coordinate } from "@/src/binary/coordinate";
-import { router, useFocusEffect } from "expo-router";
-import { ReactNode, useCallback, useRef, useState } from "react";
 import {
-    Alert,
-    Pressable,
-    StatusBar,
-    StyleSheet,
-    Text,
-    View,
-} from "react-native";
-import { GameEngine } from "react-native-game-engine";
-import { playerCoordsFromMsg } from "@/src/playerCoords";
-import {
-    binMsgFromBytes,
     binMsgFromData,
     binMsgIntoBytes,
 } from "@/src/binary/gameBinaryMessage";
-import { GameCanvas } from "@/components/Game/GameCanvas";
-import { staticBuffer } from "@/src/binary/useBuffer";
-import {
-    Gesture,
-    Directions,
-    GestureDetector,
-    GestureHandlerRootView,
-    ComposedGesture,
-    FlingGesture,
-} from "react-native-gesture-handler";
-import { globalData } from "@/src/stores/globalStore";
-import { swipeInputMsg } from "@/src/binary/swipe";
-import { SessionInfo, parseSessionInfoMsg } from "@/src/binary/sessionInfo";
-import { foodCoordFromMsg } from "@/src/foodCoords";
-import { FoodProperties } from "@/components/Game/Food";
-import { colors } from "@/src/colors";
 import { u32ToBytes } from "@/src/binary/utils";
+import { colors } from "@/src/colors";
+import { globalData } from "@/src/stores/globalStore";
+import { ReactNode, useCallback, useRef, useState } from "react";
+import { View, Text, Pressable, Alert } from "react-native";
+import {
+    ComposedGesture,
+    Directions,
+    FlingGesture,
+    Gesture,
+} from "react-native-gesture-handler";
+import GameRenderer from "./GameRenderer";
+import { router, useFocusEffect } from "expo-router";
+import { SessionInfo } from "@/src/binary/sessionInfo";
+import { COORDINATE_BYTE_WIDTH } from "@/src/binary/coordinate";
+import { BufferState } from "@/src/binary/useBuffer";
+import { swipeInputMsg } from "@/src/binary/swipe";
 
-export type GameEntities = {
-    players: {
-        [key: number]: {
-            playerId: number;
-            coords: Coordinate[];
-            renderer: React.ComponentType<SnakeProperties>;
-        };
-    };
-    foods: {
-        [key: number]: {
-            playerId: number;
-            coord: Coordinate | undefined;
-            renderer: React.ComponentType<FoodProperties>;
-        };
-    };
-};
-
-const {
-    view: msgView,
-    writeCanonicalBytes: msgWriteCanonicalBytes,
-    reAllocateBuf: msgReAllocateBuf,
-} = staticBuffer(
-    globalData.getBoardSize() *
-        globalData.getBoardSize() *
-        COORDINATE_BYTE_WIDTH *
-        16,
-);
-
-export default function GameScreenInternal() {
+export function GameScreenInteractive() {
     const [waitingFor, setWaitingFor] = useState(100_000);
     const [score, setScore] = useState(0);
 
     const socket = useRef<WebSocket | undefined>(undefined);
     const token = useRef<number | undefined>(undefined);
+
     useFocusEffect(
         useCallback(() => {
             const url = `${process.env.EXPO_PUBLIC_WEBSOCKET_BASE_URL}/game/session/${globalData.getSessionKey()}`;
             const ws = new WebSocket(url);
             ws.binaryType = "arraybuffer";
 
-            const onErr = (e: WebSocketMessageEvent) => {
-                console.error("WebSocket error:", e);
-            };
-
-            const onMsg = (e: WebSocketMessageEvent) => {
-                const data = e.data;
-                const isBinary = data instanceof ArrayBuffer;
-                if (isBinary) {
-                    onBinMsg(data);
-                }
-            };
-
-            const onBinMsg = (data: ArrayBuffer) => {
-                msgWriteCanonicalBytes(new DataView(data));
-                const msg = binMsgFromBytes(msgView());
-
-                if (msg.messageType === "SessionInfo") {
-                    const info = parseSessionInfoMsg(msg.data);
-                    onSessionInfo(info);
-                }
-
-                if (msg.messageType === "PlayerPosition") {
-                    const playerCoords = playerCoordsFromMsg(msg);
-                    globalData.setTickN(playerCoords.tickN);
-                    globalData.setCoords(
-                        playerCoords.player,
-                        playerCoords.coords,
-                    );
-                }
-
-                if (msg.messageType === "FoodPosition") {
-                    const foodCoord = foodCoordFromMsg(msg);
-                    globalData.setFood(foodCoord.player, foodCoord.coord);
-                }
-            };
-
-            const onSessionInfo = (info: SessionInfo) => {
-                if (info.type === "PlayerId") {
-                    globalData.setMe(info.value);
-                }
-
-                if (info.type === "PlayerToken") {
-                    token.current = info.value;
-                }
-
-                if (info.type === "PlayerCount") {
-                    globalData.setPlayerCount(info.value);
-                }
-
-                if (info.type === "BoardSize") {
-                    globalData.setBoardSize(info.value);
-                    const bufSize =
-                        info.value * info.value * COORDINATE_BYTE_WIDTH * 16;
-                    msgReAllocateBuf(bufSize);
-                }
-
-                if (info.type === "WaitingFor") {
-                    setWaitingFor(info.value);
-                }
-
-                if (info.type === "GameOver") {
-                    globalData.setGameOver(info.cause);
-                    setWaitingFor(globalData.getPlayerCount());
-                }
-
-                if (info.type === "Score") {
-                    setScore(info.value);
-                }
-
-                if (info.type === "Restart" && info.kind === "confirmed") {
-                    globalData.resetGameOver();
-                    setWaitingFor(0);
-                }
-
-                if (info.type === "Restart" && info.kind === "denied") {
-                    Alert.alert(
-                        "Closing Session",
-                        "Not all players wanted play again",
-                    );
-
-                    router.replace("/home");
-                }
-            };
-
-            ws.addEventListener("message", onMsg);
-            ws.addEventListener("error", onErr);
-
             socket.current = ws;
 
             return () => {
-                ws.removeEventListener("message", onMsg);
-                ws.removeEventListener("error", onErr);
-                ws.close();
+                socket.current?.close();
             };
         }, []),
     );
+
+    const onSessionInfo = useCallback((info: SessionInfo, buf: BufferState) => {
+        if (info.type === "PlayerId") {
+            globalData.setMe(info.value);
+        }
+
+        if (info.type === "PlayerToken") {
+            token.current = info.value;
+        }
+
+        if (info.type === "PlayerCount") {
+            globalData.setPlayerCount(info.value);
+        }
+
+        if (info.type === "BoardSize") {
+            globalData.setBoardSize(info.value);
+            const bufSize =
+                info.value * info.value * COORDINATE_BYTE_WIDTH * 16;
+            buf.reAllocateBuf(bufSize);
+        }
+
+        if (info.type === "WaitingFor") {
+            setWaitingFor(info.value);
+        }
+
+        if (info.type === "GameOver") {
+            globalData.setGameOver(info.cause);
+            setWaitingFor(globalData.getPlayerCount());
+        }
+
+        if (info.type === "Score") {
+            setScore(info.value);
+        }
+
+        if (info.type === "Restart" && info.kind === "confirmed") {
+            globalData.resetGameOver();
+            setWaitingFor(0);
+        }
+
+        if (info.type === "Restart" && info.kind === "denied") {
+            Alert.alert("Closing Session", "Not all players wanted play again");
+            router.replace("/home");
+        }
+    }, []);
 
     if (waitingFor > 0) {
         return (
@@ -194,7 +106,9 @@ export default function GameScreenInternal() {
     }
 
     return (
-        <GameScreenContainer
+        <GameRenderer
+            ws={socket.current}
+            onSessionInfo={onSessionInfo}
             onSwipe={swipeGestures({
                 UP: () => {
                     const msg = swipeInputMsg(
@@ -229,37 +143,7 @@ export default function GameScreenInternal() {
                     socket.current?.send(binMsgIntoBytes(msg));
                 },
             })}
-        >
-            <GameEngine
-                style={{ width: "100%", height: "100%" }}
-                renderer={GameCanvas}
-                systems={[GameLoop]}
-                entities={initialEntities()}
-                running={true}
-            >
-                <StatusBar hidden={true} />
-            </GameEngine>
-        </GameScreenContainer>
-    );
-}
-
-function GameScreenContainer({
-    children,
-    onSwipe,
-}: {
-    children: ReactNode;
-    onSwipe: ComposedGesture;
-}) {
-    return (
-        <GestureHandlerRootView>
-            <View style={styles.container}>
-                <GestureDetector gesture={onSwipe}>
-                    <View style={{ flexGrow: 1 }}>
-                        <View style={styles.gamepane}>{children}</View>
-                    </View>
-                </GestureDetector>
-            </View>
-        </GestureHandlerRootView>
+        />
     );
 }
 
@@ -444,13 +328,6 @@ function WaitForJoin({
     );
 }
 
-function initialEntities(): GameEntities {
-    return {
-        players: [],
-        foods: [],
-    };
-}
-
 type SwipeCallbacks = {
     UP: () => void;
     RIGHT: () => void;
@@ -511,28 +388,3 @@ function diagonalSwipe(
 
     return gesture;
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: "#27272a",
-        justifyContent: "space-around",
-        alignItems: "center",
-        // hacky spacing, feel free to change when adding more elements
-        gap: 12,
-        paddingVertical: 48,
-    },
-    gamepane: {
-        height: "66%",
-        aspectRatio: 1,
-        flex: undefined,
-        borderColor: colors.gameBorders,
-        borderStyle: "solid",
-        borderWidth: 2,
-        borderRadius: 10,
-    },
-    title: {
-        fontSize: 20,
-        fontWeight: "bold",
-    },
-});

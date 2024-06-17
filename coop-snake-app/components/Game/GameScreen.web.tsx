@@ -1,9 +1,8 @@
 import { Text } from "react-native";
 import React, { Suspense } from "react";
 
-import GameScreenInternal from "./GameScreenInternal";
-
 import { LoadSkiaWeb } from "@shopify/react-native-skia/lib/module/web";
+import { GameScreenInteractive } from "./GameScreenInteractive";
 export const LazySkiaInitWeb = React.lazy(async () => {
     await LoadSkiaWeb();
     // @ts-ignore
@@ -19,7 +18,7 @@ export default function GameScreen() {
             }
         >
             <LazySkiaInitWeb />
-            <GameScreenInternal />
+            <GameScreenInteractive />
         </Suspense>
     );
 }

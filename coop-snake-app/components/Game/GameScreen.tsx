@@ -1,5 +1,5 @@
-import GameScreenInternal from "./GameScreenInternal";
+import { GameScreenInteractive } from "./GameScreenInteractive";
 
 export default function GameScreen() {
-    return <GameScreenInternal />;
+    return <GameScreenInteractive />;
 }
