@@ -1,4 +1,3 @@
-import { LazySkiaInitWeb } from "@/components/Game/GameScreen.web";
 import { ScrollViewStyleReset } from "expo-router/html";
 import React, { Suspense } from "react";
 
@@ -30,12 +29,7 @@ export default function Root({ children }: { children: React.ReactNode }) {
                 />
                 {/* Add any additional <head> elements that you want globally available on web... */}
             </head>
-            <body>
-                {children}
-                <Suspense>
-                    <LazySkiaInitWeb />
-                </Suspense>
-            </body>
+            <body>{children}</body>
         </html>
     );
 }

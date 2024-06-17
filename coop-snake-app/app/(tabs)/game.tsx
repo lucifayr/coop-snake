@@ -1,4 +1,4 @@
-import GameScreen from "@/components/Game/GameScreen";
+import GameScreen from "@/components/Game/GameScreenInteractiveSkiaShell";
 import { GameContextProvider } from "@/src/context/gameContext";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useCallback } from "react";
@@ -10,7 +10,6 @@ export default function GameScreenShell() {
         useCallback(() => {
             if (!sessionKey) {
                 router.replace("/home");
-                return;
             }
         }, []),
     );

@@ -8,7 +8,7 @@ import { COORDINATE_BYTE_WIDTH } from "@/src/binary/coordinate";
 import { BufferState } from "@/src/binary/useBuffer";
 import { GameContext } from "@/src/context/gameContext";
 
-export function GameScreenViewer() {
+export default function GameView() {
     const ctx = useContext(GameContext);
     const [socket, setSocket] = useState<WebSocket | undefined>(undefined);
 

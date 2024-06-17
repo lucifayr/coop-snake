@@ -3,7 +3,13 @@ import { GameLoop } from "@/src/gameLoop";
 import { COORDINATE_BYTE_WIDTH, Coordinate } from "@/src/binary/coordinate";
 import { useFocusEffect } from "expo-router";
 import { ReactNode, useCallback, useContext } from "react";
-import { ScaledSize, StatusBar, StyleSheet, View } from "react-native";
+import {
+    ScaledSize,
+    StatusBar,
+    StyleSheet,
+    View,
+    useWindowDimensions,
+} from "react-native";
 import { GameEngine } from "react-native-game-engine";
 import { playerCoordsFromMsg } from "@/src/playerCoords";
 import { binMsgFromBytes } from "@/src/binary/gameBinaryMessage";
@@ -127,12 +133,23 @@ function GameScreenContainer({
     children: ReactNode;
     onSwipe: ComposedGesture;
 }) {
+    const { width, height } = useWindowDimensions();
+
     return (
-        <GestureHandlerRootView>
+        <GestureHandlerRootView style={{ width: "100%", height: "100%" }}>
             <View style={styles.container}>
                 <GestureDetector gesture={onSwipe}>
-                    <View style={{ flexGrow: 1 }}>
-                        <View style={styles.gamepane}>{children}</View>
+                    <View style={{ flexGrow: 1, width: "100%" }}>
+                        <View
+                            style={[
+                                styles.gamepane,
+                                width < height
+                                    ? { width: "90%" }
+                                    : { height: "90%" },
+                            ]}
+                        >
+                            {children}
+                        </View>
                     </View>
                 </GestureDetector>
             </View>
@@ -150,17 +167,17 @@ function initialEntities(): GameEntities {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        width: "100%",
         backgroundColor: "#27272a",
         justifyContent: "space-around",
         alignItems: "center",
-        // hacky spacing, feel free to change when adding more elements
-        gap: 12,
         paddingVertical: 48,
     },
     gamepane: {
-        width: "90%",
         aspectRatio: 1,
+        height: undefined,
         flex: undefined,
+        alignSelf: "center",
         borderColor: colors.gameBorders,
         borderStyle: "solid",
         borderWidth: 2,

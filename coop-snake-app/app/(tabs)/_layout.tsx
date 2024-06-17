@@ -1,6 +1,7 @@
+import { LoadSkiaWeb } from "@shopify/react-native-skia/lib/module/web";
 import { Tabs } from "expo-router";
-import React from "react";
-import { Dimensions } from "react-native";
+import React, { useEffect } from "react";
+import { Dimensions, Platform } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function TabLayout() {

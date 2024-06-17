@@ -20,7 +20,7 @@ import { BufferState } from "@/src/binary/useBuffer";
 import { swipeInputMsg } from "@/src/binary/swipe";
 import { GameContext, GameContextApi } from "@/src/context/gameContext";
 
-export function GameScreenInteractive() {
+export default function GameScreenInteractive() {
     const ctx = useContext(GameContext);
     const [waitingFor, setWaitingFor] = useState(100_000);
     const [score, setScore] = useState(0);
