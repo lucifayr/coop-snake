@@ -4,8 +4,7 @@ import {
 } from "@/src/binary/gameBinaryMessage";
 import { u32ToBytes } from "@/src/binary/utils";
 import { colors } from "@/src/colors";
-import { globalData } from "@/src/stores/globalStore";
-import { ReactNode, useCallback, useRef, useState } from "react";
+import { ReactNode, useCallback, useContext, useRef, useState } from "react";
 import { View, Text, Pressable, Alert } from "react-native";
 import {
     ComposedGesture,
@@ -19,8 +18,10 @@ import { SessionInfo } from "@/src/binary/sessionInfo";
 import { COORDINATE_BYTE_WIDTH } from "@/src/binary/coordinate";
 import { BufferState } from "@/src/binary/useBuffer";
 import { swipeInputMsg } from "@/src/binary/swipe";
+import { GameContext, GameContextApi } from "@/src/context/gameContext";
 
 export function GameScreenInteractive() {
+    const ctx = useContext(GameContext);
     const [waitingFor, setWaitingFor] = useState(100_000);
     const [score, setScore] = useState(0);
     const [socket, setSocket] = useState<WebSocket | undefined>(undefined);
@@ -29,7 +30,7 @@ export function GameScreenInteractive() {
 
     const onSessionInfo = useCallback((info: SessionInfo, buf: BufferState) => {
         if (info.type === "PlayerId") {
-            globalData.setMe(info.value);
+            ctx.setMe(info.value);
         }
 
         if (info.type === "PlayerToken") {
@@ -37,11 +38,11 @@ export function GameScreenInteractive() {
         }
 
         if (info.type === "PlayerCount") {
-            globalData.setPlayerCount(info.value);
+            ctx.setPlayerCount(info.value);
         }
 
         if (info.type === "BoardSize") {
-            globalData.setBoardSize(info.value);
+            ctx.setBoardSize(info.value);
             const bufSize =
                 info.value * info.value * COORDINATE_BYTE_WIDTH * 16;
             buf.reAllocateBuf(bufSize);
@@ -52,8 +53,8 @@ export function GameScreenInteractive() {
         }
 
         if (info.type === "GameOver") {
-            globalData.setGameOver(info.cause);
-            setWaitingFor(globalData.getPlayerCount());
+            ctx.setGameOver(info.cause);
+            setWaitingFor(ctx.getPlayerCount());
         }
 
         if (info.type === "Score") {
@@ -61,7 +62,7 @@ export function GameScreenInteractive() {
         }
 
         if (info.type === "Restart" && info.kind === "confirmed") {
-            globalData.resetGameOver();
+            ctx.resetGameOver();
             setWaitingFor(0);
         }
 
@@ -75,7 +76,7 @@ export function GameScreenInteractive() {
 
     useFocusEffect(
         useCallback(() => {
-            const url = `${process.env.EXPO_PUBLIC_WEBSOCKET_BASE_URL}/game/session/${globalData.getSessionKey()}`;
+            const url = `${process.env.EXPO_PUBLIC_WEBSOCKET_BASE_URL}/game/session/${ctx.getSessionKey()}`;
             const ws = new WebSocket(url);
             ws.binaryType = "arraybuffer";
 
@@ -89,7 +90,7 @@ export function GameScreenInteractive() {
     if (waitingFor > 0) {
         return (
             <WaitingFor>
-                {globalData.getGameOverInfo().gameOver ? (
+                {ctx.getGameOverInfo().gameOver ? (
                     <WaitForRestart
                         waitingFor={waitingFor}
                         score={score}
@@ -98,7 +99,7 @@ export function GameScreenInteractive() {
                     />
                 ) : (
                     <WaitForJoin
-                        sessionKey={globalData.getSessionKey() ?? "---"}
+                        sessionKey={ctx.getSessionKey() ?? "---"}
                         waitingFor={waitingFor}
                     />
                 )}
@@ -108,11 +109,11 @@ export function GameScreenInteractive() {
 
     return (
         <GameRenderer
-            onSwipe={swipeGestures({
+            onSwipe={swipeGestures(ctx, {
                 UP: () => {
                     const msg = swipeInputMsg(
                         "up",
-                        globalData.getTickN(),
+                        ctx.getTickN(),
                         token.current,
                     );
                     socket?.send(binMsgIntoBytes(msg));
@@ -120,7 +121,7 @@ export function GameScreenInteractive() {
                 RIGHT: () => {
                     const msg = swipeInputMsg(
                         "right",
-                        globalData.getTickN(),
+                        ctx.getTickN(),
                         token.current,
                     );
                     socket?.send(binMsgIntoBytes(msg));
@@ -128,7 +129,7 @@ export function GameScreenInteractive() {
                 DOWN: () => {
                     const msg = swipeInputMsg(
                         "down",
-                        globalData.getTickN(),
+                        ctx.getTickN(),
                         token.current,
                     );
                     socket?.send(binMsgIntoBytes(msg));
@@ -136,7 +137,7 @@ export function GameScreenInteractive() {
                 LEFT: () => {
                     const msg = swipeInputMsg(
                         "left",
-                        globalData.getTickN(),
+                        ctx.getTickN(),
                         token.current,
                     );
                     socket?.send(binMsgIntoBytes(msg));
@@ -334,16 +335,19 @@ type SwipeCallbacks = {
     LEFT: () => void;
 };
 
-function swipeGestures(callbacks: SwipeCallbacks): ComposedGesture {
+function swipeGestures(
+    ctx: GameContextApi,
+    callbacks: SwipeCallbacks,
+): ComposedGesture {
     const gesUp = swipe("UP", callbacks);
     const gesRight = swipe("RIGHT", callbacks);
     const gesDown = swipe("DOWN", callbacks);
     const gesLeft = swipe("LEFT", callbacks);
 
-    const gesUpRight = diagonalSwipe("UP", "RIGHT", callbacks);
-    const gesUpLeft = diagonalSwipe("UP", "LEFT", callbacks);
-    const gesDownRight = diagonalSwipe("DOWN", "RIGHT", callbacks);
-    const gesDownLeft = diagonalSwipe("DOWN", "LEFT", callbacks);
+    const gesUpRight = diagonalSwipe(ctx, "UP", "RIGHT", callbacks);
+    const gesUpLeft = diagonalSwipe(ctx, "UP", "LEFT", callbacks);
+    const gesDownRight = diagonalSwipe(ctx, "DOWN", "RIGHT", callbacks);
+    const gesDownLeft = diagonalSwipe(ctx, "DOWN", "LEFT", callbacks);
 
     return Gesture.Exclusive(
         gesUp,
@@ -371,6 +375,7 @@ function swipe(
 }
 
 function diagonalSwipe(
+    ctx: GameContextApi,
     dir1: keyof typeof Directions,
     dir2: keyof typeof Directions,
     callbacks: SwipeCallbacks,
@@ -378,7 +383,7 @@ function diagonalSwipe(
     const gesture = Gesture.Fling();
     gesture.config.direction = Directions[dir1] | Directions[dir2];
     gesture.onEnd(() => {
-        if (globalData.getDirection(globalData.me()) === dir1) {
+        if (ctx.getDirection(ctx.me()) === dir1) {
             callbacks[dir2]();
         } else {
             callbacks[dir1]();

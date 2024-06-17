@@ -5,7 +5,6 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 
 import { useForm, SubmitHandler, Controller } from "react-hook-form";
 import { SessionConfig, newSession } from "@/src/sessionConfig";
-import { globalData } from "@/src/stores/globalStore";
 import Button from "@/components/Button";
 
 type Input = {
@@ -54,8 +53,7 @@ export default function NewSessionScreen() {
         setLoading(false);
 
         if (key) {
-            globalData.setSessionKey(key);
-            router.replace("/game");
+            router.replace({ pathname: "/game", params: { sessionKey: key } });
         } else {
             Alert.alert("Failed to create session");
         }

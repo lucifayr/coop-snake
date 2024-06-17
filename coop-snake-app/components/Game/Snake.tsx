@@ -9,10 +9,16 @@ import {
 } from "@shopify/react-native-skia";
 import { gridPosToPixels, gridCellSize } from "@/src/scaling";
 import { snakeSegmentDir } from "@/src/binary/utils";
-import { SnakeDirection, globalData } from "@/src/stores/globalStore";
+import {
+    GameContext,
+    GameContextApi,
+    SnakeDirection,
+} from "@/src/context/gameContext";
 import { colors } from "@/src/colors";
+import { useContext } from "react";
 
 export type SnakeProperties = {
+    ctx: GameContextApi;
     playerId: number;
     coords: Coordinate[];
     layout: { width: number };
@@ -160,13 +166,21 @@ export function Snake(props: SnakeProperties) {
         );
         prevDir = dir;
 
-        const xPos = gridPosToPixels(coord.x, canvasWidth);
-        const yPos = gridPosToPixels(coord.y, canvasWidth);
+        const xPos = gridPosToPixels(
+            props.ctx.getBoardSize(),
+            coord.x,
+            canvasWidth,
+        );
+        const yPos = gridPosToPixels(
+            props.ctx.getBoardSize(),
+            coord.y,
+            canvasWidth,
+        );
 
-        const size = gridCellSize(canvasWidth);
+        const size = gridCellSize(props.ctx.getBoardSize(), canvasWidth);
         return (
             <Group key={idx}>
-                {props.playerId === globalData.me() && (
+                {props.playerId === props.ctx.me() && (
                     <RoundedRect
                         r={2}
                         color={colors.playerHighlight}

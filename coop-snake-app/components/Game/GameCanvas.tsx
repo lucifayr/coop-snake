@@ -1,13 +1,14 @@
 import { colors } from "@/src/colors";
-import { globalData } from "@/src/stores/globalStore";
 import { Canvas, Line } from "@shopify/react-native-skia";
 import { ReactElement } from "react";
 import { ScaledSize } from "react-native";
 
 import { DefaultRenderer } from "react-native-game-engine";
 import { GameEntities } from "./GameRenderer";
+import { GameContextApi } from "@/src/context/gameContext";
 
 export function GameCanvas(
+    ctx: GameContextApi,
     entities: GameEntities,
     screen: ScaledSize,
     layout: { width: number },
@@ -18,8 +19,8 @@ export function GameCanvas(
     // DefaultRendere as is
     const renderer = DefaultRenderer as any;
 
-    const lines = globalData.hasDebugFlag("show-grid-lines")
-        ? gridLines(globalData.getBoardSize(), layout?.width)
+    const lines = ctx.hasDebugFlag("show-grid-lines")
+        ? gridLines(ctx.getBoardSize(), layout?.width)
         : undefined;
 
     return (

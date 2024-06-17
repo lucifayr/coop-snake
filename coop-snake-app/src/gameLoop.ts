@@ -1,24 +1,28 @@
-import { globalData } from "./stores/globalStore";
 import { Snake } from "@/components/Game/Snake";
 import { Food } from "@/components/Game/Food";
 import { GameEntities } from "@/components/Game/GameRenderer";
+import { GameContextApi } from "./context/gameContext";
 
 export const randomBetween = (min: number, max: number): number => {
     return Math.floor(Math.random() * (max - min + 1) + min);
 };
 
-export const GameLoop = (entities: GameEntities): GameEntities => {
-    if (globalData.getGameOverInfo().gameOver) {
+export const GameLoop = (
+    ctx: GameContextApi,
+    entities: GameEntities,
+): GameEntities => {
+    if (ctx.getGameOverInfo().gameOver) {
         return entities;
     }
 
-    for (let i = 1; i <= globalData.getPlayerCount(); i++) {
-        const playerCoords = globalData.getCoords(i) ?? [];
-        const foodCoord = globalData.getFood(i);
+    for (let i = 1; i <= ctx.getPlayerCount(); i++) {
+        const playerCoords = ctx.getCoords(i) ?? [];
+        const foodCoord = ctx.getFood(i);
 
         const player = entities.players[i];
         if (!player) {
             entities.players[i] = {
+                ctx,
                 playerId: i,
                 coords: playerCoords,
                 renderer: Snake,
@@ -30,6 +34,7 @@ export const GameLoop = (entities: GameEntities): GameEntities => {
         const food = entities.foods[i];
         if (!food) {
             entities.foods[i] = {
+                ctx,
                 playerId: i,
                 coord: foodCoord,
 

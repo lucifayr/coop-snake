@@ -1,10 +1,16 @@
 import { Coordinate } from "@/src/binary/coordinate";
-import { Image, RoundedRect, useImage } from "@shopify/react-native-skia";
+import {
+    Group,
+    Image,
+    RoundedRect,
+    useImage,
+} from "@shopify/react-native-skia";
 import { gridPosToPixels, gridCellSize } from "@/src/scaling";
-import { globalData } from "@/src/stores/globalStore";
 import { colors } from "@/src/colors";
+import { GameContextApi } from "@/src/context/gameContext";
 
 export type FoodProperties = {
+    ctx: GameContextApi;
     playerId: number;
     coord: Coordinate | undefined;
     layout: { width: number };
@@ -18,13 +24,21 @@ export function Food(props: FoodProperties) {
     }
 
     const canvasWidth = props.layout.width;
-    const size = gridCellSize(canvasWidth);
-    const xPos = gridPosToPixels(props.coord.x, canvasWidth);
-    const yPos = gridPosToPixels(props.coord.y, canvasWidth);
+    const size = gridCellSize(props.ctx.getBoardSize(), canvasWidth);
+    const xPos = gridPosToPixels(
+        props.ctx.getBoardSize(),
+        props.coord.x,
+        canvasWidth,
+    );
+    const yPos = gridPosToPixels(
+        props.ctx.getBoardSize(),
+        props.coord.y,
+        canvasWidth,
+    );
 
     return (
-        <>
-            {props.playerId === globalData.me() && (
+        <Group>
+            {props.playerId === props.ctx.me() && (
                 <RoundedRect
                     r={2}
                     color={colors.playerHighlight}
@@ -42,6 +56,6 @@ export function Food(props: FoodProperties) {
                 x={xPos}
                 y={yPos}
             />
-        </>
+        </Group>
     );
 }

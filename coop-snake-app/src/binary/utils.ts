@@ -1,4 +1,4 @@
-import { SnakeDirection } from "../stores/globalStore";
+import { SnakeDirection } from "../context/gameContext";
 import { Coordinate } from "./coordinate";
 import React from "react";
 import { useFocusEffect } from "@react-navigation/native";

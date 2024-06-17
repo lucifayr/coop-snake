@@ -2,8 +2,8 @@ import { SnakeProperties } from "@/components/Game/Snake";
 import { GameLoop } from "@/src/gameLoop";
 import { COORDINATE_BYTE_WIDTH, Coordinate } from "@/src/binary/coordinate";
 import { useFocusEffect } from "expo-router";
-import { ReactNode, useCallback } from "react";
-import { StatusBar, StyleSheet, View } from "react-native";
+import { ReactNode, useCallback, useContext } from "react";
+import { ScaledSize, StatusBar, StyleSheet, View } from "react-native";
 import { GameEngine } from "react-native-game-engine";
 import { playerCoordsFromMsg } from "@/src/playerCoords";
 import { binMsgFromBytes } from "@/src/binary/gameBinaryMessage";
@@ -14,15 +14,16 @@ import {
     GestureHandlerRootView,
     ComposedGesture,
 } from "react-native-gesture-handler";
-import { globalData } from "@/src/stores/globalStore";
 import { SessionInfo, parseSessionInfoMsg } from "@/src/binary/sessionInfo";
 import { foodCoordFromMsg } from "@/src/foodCoords";
 import { FoodProperties } from "@/components/Game/Food";
 import { colors } from "@/src/colors";
+import { GameContext, GameContextApi } from "@/src/context/gameContext";
 
 export type GameEntities = {
     players: {
         [key: number]: {
+            ctx: GameContextApi;
             playerId: number;
             coords: Coordinate[];
             renderer: React.ComponentType<SnakeProperties>;
@@ -30,6 +31,7 @@ export type GameEntities = {
     };
     foods: {
         [key: number]: {
+            ctx: GameContextApi;
             playerId: number;
             coord: Coordinate | undefined;
             renderer: React.ComponentType<FoodProperties>;
@@ -37,19 +39,21 @@ export type GameEntities = {
     };
 };
 
-const staticBuf = staticBuffer(
-    globalData.getBoardSize() *
-        globalData.getBoardSize() *
-        COORDINATE_BYTE_WIDTH *
-        16,
-);
-
 export function useRenderer(
     ws: WebSocket | undefined,
     onSessionInfo: (info: SessionInfo, buf: BufferState) => void,
 ) {
+    const ctx = useContext(GameContext);
+
     useFocusEffect(
         useCallback(() => {
+            const staticBuf = staticBuffer(
+                ctx.getBoardSize() *
+                    ctx.getBoardSize() *
+                    COORDINATE_BYTE_WIDTH *
+                    16,
+            );
+
             const onErr = (e: WebSocketMessageEvent) => {
                 console.error("WebSocket error:", e);
             };
@@ -73,16 +77,13 @@ export function useRenderer(
 
                 if (msg.messageType === "PlayerPosition") {
                     const playerCoords = playerCoordsFromMsg(msg);
-                    globalData.setTickN(playerCoords.tickN);
-                    globalData.setCoords(
-                        playerCoords.player,
-                        playerCoords.coords,
-                    );
+                    ctx.setTickN(playerCoords.tickN);
+                    ctx.setCoords(playerCoords.player, playerCoords.coords);
                 }
 
                 if (msg.messageType === "FoodPosition") {
                     const foodCoord = foodCoordFromMsg(msg);
-                    globalData.setFood(foodCoord.player, foodCoord.coord);
+                    ctx.setFood(foodCoord.player, foodCoord.coord);
                 }
             };
 
@@ -98,12 +99,18 @@ export function useRenderer(
 }
 
 export function GameRenderer({ onSwipe }: { onSwipe: ComposedGesture }) {
+    const ctx = useContext(GameContext);
+
     return (
         <GameScreenContainer onSwipe={onSwipe}>
             <GameEngine
                 style={{ width: "100%", height: "100%" }}
-                renderer={GameCanvas}
-                systems={[GameLoop]}
+                renderer={(
+                    entities: GameEntities,
+                    screen: ScaledSize,
+                    layout: { width: number },
+                ) => GameCanvas(ctx, entities, screen, layout)}
+                systems={[(entities: any) => GameLoop(ctx, entities)]}
                 entities={initialEntities()}
                 running={true}
             >
@@ -151,7 +158,7 @@ const styles = StyleSheet.create({
         paddingVertical: 48,
     },
     gamepane: {
-        height: "66%",
+        width: "90%",
         aspectRatio: 1,
         flex: undefined,
         borderColor: colors.gameBorders,

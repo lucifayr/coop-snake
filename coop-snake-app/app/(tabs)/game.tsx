@@ -1,16 +1,23 @@
 import GameScreen from "@/components/Game/GameScreen";
-import { globalData } from "@/src/stores/globalStore";
-import { router, useFocusEffect } from "expo-router";
+import { GameContextProvider } from "@/src/context/gameContext";
+import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useCallback } from "react";
 
 export default function GameScreenShell() {
+    const { sessionKey } = useLocalSearchParams<{ sessionKey?: string }>();
+
     useFocusEffect(
         useCallback(() => {
-            if (!globalData.getSessionKey()) {
-                router.replace("/new-session");
+            if (!sessionKey) {
+                router.replace("/home");
+                return;
             }
         }, []),
     );
 
-    return <GameScreen />;
+    return (
+        <GameContextProvider sessionKey={sessionKey}>
+            <GameScreen />
+        </GameContextProvider>
+    );
 }

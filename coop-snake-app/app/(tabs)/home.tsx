@@ -1,8 +1,7 @@
 import Button from "@/components/Button";
-import { globalData } from "@/src/stores/globalStore";
 import { useHeaderHeight } from "@react-navigation/elements";
-import { useFocusEffect, useRouter } from "expo-router";
-import { useCallback, useState } from "react";
+import { useRouter } from "expo-router";
+import { useState } from "react";
 import {
     Button as Btn,
     ImageBackground,
@@ -19,12 +18,6 @@ export default function HomeScreen() {
 
     const [isModalVisible, setIsModalVisible] = useState(false);
     const handleModal = () => setIsModalVisible(() => !isModalVisible);
-
-    useFocusEffect(
-        useCallback(() => {
-            globalData.resetStore();
-        }, []),
-    );
 
     return (
         <ImageBackground
@@ -61,7 +54,7 @@ export default function HomeScreen() {
                         placeholder="000000"
                         maxLength={6}
                         onChangeText={(text) => {
-                            globalData.setSessionKey(text);
+                            router.setParams({ sessionKey: text });
                         }}
                     />
                     <Button
