@@ -44,7 +44,7 @@ export default function HomeScreen() {
                 />
                 <Button
                     onClick={() => router.navigate("/highscores")}
-                    text="View Highscores"
+                    text="View High scores"
                 />
             </View>
 

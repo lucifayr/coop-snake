@@ -1,13 +1,16 @@
-import { LoadSkiaWeb } from "@shopify/react-native-skia/lib/module/web";
 import { Text } from "react-native";
 import React, { Suspense } from "react";
 
-const Screen = React.lazy(async () => {
+import GameScreenInternal from "./GameScreenInternal";
+
+import { LoadSkiaWeb } from "@shopify/react-native-skia/lib/module/web";
+export const LazySkiaInitWeb = React.lazy(async () => {
     await LoadSkiaWeb();
     // @ts-ignore
-    return import("./GameScreenInternal");
+    return import("./Dummy");
 });
 
+// TODO: update loading info text
 export default function GameScreen() {
     return (
         <Suspense
@@ -15,7 +18,8 @@ export default function GameScreen() {
                 <Text style={{ textAlign: "center" }}>Loading Skia...</Text>
             }
         >
-            <Screen />
+            <LazySkiaInitWeb />
+            <GameScreenInternal />
         </Suspense>
     );
 }

@@ -16,6 +16,8 @@ import {
 } from "@tanstack/react-query";
 import { useRefreshOnFocus } from "@/src/binary/utils";
 
+// TODO: update info text styling
+
 const queryClient = new QueryClient();
 
 export default function HighscoreScreenShell() {
@@ -48,12 +50,15 @@ function HighscoreScreen() {
             </Pressable>
 
             <StatusBar backgroundColor="#EBAB9D" />
-            <Text style={styles.header}>Today's High Scores</Text>
+            <Text style={styles.header}>Today's High scores</Text>
             {query.isLoading && <ActivityIndicator size="large" />}
-            {query.error && <Text>Failed to fetch High Scores</Text>}
+            {query.error && <Text>Failed to fetch High scores</Text>}
             {query.data && (
                 <FlatList
                     data={query.data}
+                    ListEmptyComponent={
+                        <Text>No High scores have been set yet</Text>
+                    }
                     renderItem={({ item }) => (
                         <View style={styles.highscore}>
                             <Text style={styles.highscoreText}>

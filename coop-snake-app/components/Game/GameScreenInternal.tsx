@@ -427,8 +427,8 @@ function WaitForJoin({
             <View style={{ alignItems: "center" }}>
                 <Text style={{ color: "#fff", fontSize: 12 }}>Key</Text>
                 <Text
-                    selectable={true}
                     style={{
+                        userSelect: "all",
                         color: "#fff",
                         fontWeight: 900,
                         fontSize: 16,

@@ -15,7 +15,7 @@ type Input = {
     initialSnakeSize?: string;
 };
 
-export default function HighscoreScreen() {
+export default function NewSessionScreen() {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
 
