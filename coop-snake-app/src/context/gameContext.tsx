@@ -41,10 +41,14 @@ export function GameContextProvider({
     const ctx = useMemo(() => initContext(), []);
 
     useFocusEffect(
-        useCallback(() => {
-            ctx.resetStore();
-            ctx.setSessionKey(sessionKey);
-        }, []),
+        useCallback(
+            () => {
+                ctx.resetStore();
+                ctx.setSessionKey(sessionKey);
+            },
+            // eslint-disable-next-line
+            [],
+        ),
     );
 
     if (!sessionKey) {

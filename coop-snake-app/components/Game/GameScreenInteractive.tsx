@@ -29,49 +29,55 @@ export default function GameScreenInteractive() {
 
     const token = useRef<number | undefined>(undefined);
 
-    const onSessionInfo = useCallback((info: SessionInfo, buf: BufferState) => {
-        if (info.type === "PlayerId") {
-            ctx.setMe(info.value);
-        }
+    const onSessionInfo = useCallback(
+        (info: SessionInfo, buf: BufferState) => {
+            if (info.type === "PlayerId") {
+                ctx.setMe(info.value);
+            }
 
-        if (info.type === "PlayerToken") {
-            token.current = info.value;
-        }
+            if (info.type === "PlayerToken") {
+                token.current = info.value;
+            }
 
-        if (info.type === "PlayerCount") {
-            ctx.setPlayerCount(info.value);
-        }
+            if (info.type === "PlayerCount") {
+                ctx.setPlayerCount(info.value);
+            }
 
-        if (info.type === "BoardSize") {
-            ctx.setBoardSize(info.value);
-            const bufSize =
-                info.value * info.value * COORDINATE_BYTE_WIDTH * 16;
-            buf.reAllocateBuf(bufSize);
-        }
+            if (info.type === "BoardSize") {
+                ctx.setBoardSize(info.value);
+                const bufSize =
+                    info.value * info.value * COORDINATE_BYTE_WIDTH * 16;
+                buf.reAllocateBuf(bufSize);
+            }
 
-        if (info.type === "WaitingFor") {
-            setWaitingFor(info.value);
-        }
+            if (info.type === "WaitingFor") {
+                setWaitingFor(info.value);
+            }
 
-        if (info.type === "GameOver") {
-            ctx.setGameOver(info.cause);
-            setWaitingFor(ctx.getPlayerCount());
-        }
+            if (info.type === "GameOver") {
+                ctx.setGameOver(info.cause);
+                setWaitingFor(ctx.getPlayerCount());
+            }
 
-        if (info.type === "Score") {
-            setScore(info.value);
-        }
+            if (info.type === "Score") {
+                setScore(info.value);
+            }
 
-        if (info.type === "Restart" && info.kind === "confirmed") {
-            ctx.resetGameOver();
-            setWaitingFor(0);
-        }
+            if (info.type === "Restart" && info.kind === "confirmed") {
+                ctx.resetGameOver();
+                setWaitingFor(0);
+            }
 
-        if (info.type === "Restart" && info.kind === "denied") {
-            Alert.alert("Closing Session", "Not all players wanted play again");
-            router.replace("/home");
-        }
-    }, []);
+            if (info.type === "Restart" && info.kind === "denied") {
+                Alert.alert(
+                    "Closing Session",
+                    "Not all players wanted play again",
+                );
+                router.replace("/home");
+            }
+        },
+        [ctx],
+    );
 
     useRenderer(socket, onSessionInfo);
 
@@ -87,7 +93,7 @@ export default function GameScreenInteractive() {
             return () => {
                 ws.close();
             };
-        }, []),
+        }, [ctx]),
     );
 
     if (waitingFor > 0) {

@@ -9,13 +9,8 @@ import {
 } from "@shopify/react-native-skia";
 import { gridPosToPixels, gridCellSize } from "@/src/scaling";
 import { snakeSegmentDir } from "@/src/binary/utils";
-import {
-    GameContext,
-    GameContextApi,
-    SnakeDirection,
-} from "@/src/context/gameContext";
+import { GameContextApi, SnakeDirection } from "@/src/context/gameContext";
 import { colors } from "@/src/colors";
-import { useContext } from "react";
 
 export type SnakeProperties = {
     ctx: GameContextApi;

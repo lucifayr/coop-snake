@@ -100,7 +100,7 @@ export function useRenderer(
                 ws?.removeEventListener("message", onMsg);
                 ws?.removeEventListener("error", onErr);
             };
-        }, [ws, onSessionInfo]),
+        }, [ws, onSessionInfo, ctx]),
     );
 }
 
@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         width: "100%",
-        backgroundColor: "#27272a",
+        backgroundColor: colors.bg,
         justifyContent: "space-around",
         alignItems: "center",
         paddingVertical: 48,

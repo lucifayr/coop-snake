@@ -11,7 +11,7 @@ export default function GameScreenShell() {
             if (!sessionKey) {
                 router.replace("/home");
             }
-        }, []),
+        }, [sessionKey]),
     );
 
     return (
