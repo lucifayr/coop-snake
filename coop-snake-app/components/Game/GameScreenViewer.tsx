@@ -71,6 +71,7 @@ export default function GameView() {
 
     useFocusEffect(
         useCallback(() => {
+            ctx.setMe(0);
             const url = `${process.env.EXPO_PUBLIC_WEBSOCKET_BASE_URL}/game/session/view/${ctx.getSessionKey()}`;
             const ws = new WebSocket(url);
             ws.binaryType = "arraybuffer";
