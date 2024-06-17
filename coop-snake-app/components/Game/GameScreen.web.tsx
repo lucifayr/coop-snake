@@ -4,6 +4,7 @@ import React, { Suspense } from "react";
 
 const Screen = React.lazy(async () => {
     await LoadSkiaWeb();
+    // @ts-ignore
     return import("./GameScreenInternal");
 });
 

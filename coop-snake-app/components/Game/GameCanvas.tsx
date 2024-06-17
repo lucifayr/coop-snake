@@ -1,4 +1,3 @@
-import { GameEntities } from "@/app/(tabs)/game";
 import { colors } from "@/src/colors";
 import { globalData } from "@/src/stores/globalStore";
 import { Canvas, Line } from "@shopify/react-native-skia";
@@ -6,6 +5,7 @@ import { ReactElement } from "react";
 import { ScaledSize } from "react-native";
 
 import { DefaultRenderer } from "react-native-game-engine";
+import { GameEntities } from "./GameScreenInternal";
 
 export function GameCanvas(
     entities: GameEntities,

@@ -231,6 +231,7 @@ export default function GameScreenInternal() {
             })}
         >
             <GameEngine
+                style={{ width: "100%", height: "100%" }}
                 renderer={GameCanvas}
                 systems={[GameLoop]}
                 entities={initialEntities()}
@@ -522,9 +523,8 @@ const styles = StyleSheet.create({
         paddingVertical: 48,
     },
     gamepane: {
-        width: "90%",
+        height: "66%",
         aspectRatio: 1,
-        height: undefined,
         flex: undefined,
         borderColor: colors.gameBorders,
         borderStyle: "solid",
