@@ -4,14 +4,7 @@ import { colors } from "@/src/colors";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useRouter } from "expo-router";
 import { useRef, useState } from "react";
-import {
-    ImageBackground,
-    Modal,
-    StatusBar,
-    StyleSheet,
-    Text,
-    View,
-} from "react-native";
+import { Modal, StatusBar, StyleSheet, Text, View } from "react-native";
 
 export default function HomeScreen() {
     const headerHeight = useHeaderHeight();

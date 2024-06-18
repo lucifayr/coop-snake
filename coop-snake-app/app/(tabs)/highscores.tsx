@@ -1,10 +1,7 @@
-import { AntDesign } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import {
     ActivityIndicator,
     FlatList,
-    Pressable,
     StyleSheet,
     Text,
     View,
@@ -17,8 +14,6 @@ import {
 import { useRefreshOnFocus } from "@/src/binary/utils";
 import { colors } from "@/src/colors";
 import { BackButton } from "@/components/Back";
-
-// TODO: update info text styling
 
 const queryClient = new QueryClient();
 

@@ -11,7 +11,7 @@ import {
 import { gridPosToPixels, gridCellSize } from "@/src/scaling";
 import { snakeSegmentDir } from "@/src/binary/utils";
 import { GameContextApi, SnakeDirection } from "@/src/context/gameContext";
-import { colorMatrixWhite, colors, getSnakeColorMatrix } from "@/src/colors";
+import { colorMatrixWhite, getSnakeColorMatrix } from "@/src/colors";
 
 export type SnakeProperties = {
     ctx: GameContextApi;
