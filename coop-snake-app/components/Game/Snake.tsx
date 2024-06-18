@@ -4,14 +4,16 @@ import {
     ColorMatrix,
     Group,
     Image,
+    Mask,
     Morphology,
+    Paint,
     SkImage,
     useImage,
 } from "@shopify/react-native-skia";
 import { gridPosToPixels, gridCellSize } from "@/src/scaling";
 import { snakeSegmentDir } from "@/src/binary/utils";
 import { GameContextApi, SnakeDirection } from "@/src/context/gameContext";
-import { colorMatrixWhite, getSnakeColorMatrix } from "@/src/colors";
+import { colorMatrixGrayScale, getSnakeColorMatrix } from "@/src/colors";
 
 export type SnakeProperties = {
     ctx: GameContextApi;
@@ -178,6 +180,7 @@ export function Snake(props: SnakeProperties) {
             canvasWidth,
         );
         const size = gridCellSize(props.ctx.getBoardSize(), canvasWidth);
+
         return (
             <Group key={idx}>
                 <Image
@@ -188,19 +191,9 @@ export function Snake(props: SnakeProperties) {
                     x={xPos}
                     y={yPos}
                 >
-                    <Morphology radius={1}>
-                        <ColorMatrix matrix={colorMatrixSnakeColor} />
-                        <ColorMatrix matrix={colorMatrixWhite} />
-                    </Morphology>
+                    <ColorMatrix matrix={colorMatrixSnakeColor} />
+                    <ColorMatrix matrix={colorMatrixGrayScale} />
                 </Image>
-                <Image
-                    image={sprites[sprite]}
-                    fit="cover"
-                    width={size}
-                    height={size}
-                    x={xPos}
-                    y={yPos}
-                />
             </Group>
         );
     });

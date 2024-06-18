@@ -13,17 +13,21 @@ export const colors = {
     disabled: "#292524",
 } as const;
 
-export const colorMatrixWhite: number[] = [
-    1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 0, 1, 0,
+export const colorMatrixGrayScale: number[] = [
+    0.5, 0.5, 0.5, 0, 0, 0.5, 0.5, 0.5, 0, 0, 0.5, 0.5, 0.5, 0, 0, 0, 0.5, 0,
+    0.5, 0,
 ] as const;
 
 const snakeColors = [
     "#fde047",
-    "#ef4444",
-    "#22c55e",
-    "#3b82f6",
-    "#a855f7",
     "#f97316",
+    "#b91c1c",
+    "#f43f5e",
+    "#a3e635",
+    "#22c55e",
+    "#2563eb",
+    "#a5f3fc",
+    "#a855f7",
 ] as const;
 
 export function getSnakeColorMatrix(
