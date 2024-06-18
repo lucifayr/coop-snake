@@ -44,7 +44,7 @@ export function GameContextProvider({
         useCallback(() => {
             ctx.resetStore();
             ctx.setSessionKey(sessionKey);
-        }, [sessionKey]),
+        }, [sessionKey, ctx]),
     );
 
     if (!sessionKey) {

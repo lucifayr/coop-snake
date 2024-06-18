@@ -6,7 +6,7 @@ import {
     useImage,
 } from "@shopify/react-native-skia";
 import { gridPosToPixels, gridCellSize } from "@/src/scaling";
-import { colorMatrixGrayScale } from "@/src/colors";
+import { colorMatrixGrayScale, getSnakeColorMatrix } from "@/src/colors";
 import { GameContextApi } from "@/src/context/gameContext";
 
 export type FoodProperties = {
@@ -18,6 +18,11 @@ export type FoodProperties = {
 
 export function Food(props: FoodProperties) {
     const sprite = useImage(require("@/assets/game/apple.png"));
+
+    const colorMatrixSnakeColor = getSnakeColorMatrix(
+        props.playerId,
+        props.ctx.getSessionKey(),
+    );
 
     if (props.coord === undefined) {
         return null;
@@ -45,9 +50,8 @@ export function Food(props: FoodProperties) {
             x={xPos}
             y={yPos}
         >
-            {props.playerId !== props.ctx.me() && (
-                <ColorMatrix matrix={colorMatrixGrayScale} />
-            )}
+            <ColorMatrix matrix={colorMatrixSnakeColor} />
+            <ColorMatrix matrix={colorMatrixGrayScale} />
             {props.playerId === props.ctx.me() && (
                 <Shadow blur={5} dx={0} dy={0} color={"#f59e0b"} />
             )}
