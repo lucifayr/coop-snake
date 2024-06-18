@@ -13,7 +13,7 @@ export function BackButton() {
                 alignItems: "center",
                 width: "100%",
             }}
-            onPress={() => router.navigate("/home")}
+            onPress={() => router.replace("/home")}
         >
             <AntDesign name="caretleft" size={24} color="white" />
             <Text style={{ color: "white", fontSize: 20 }}>Back</Text>

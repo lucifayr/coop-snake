@@ -69,9 +69,8 @@ export default function NewSessionScreen() {
             initialSnakeSize: Number.isNaN(snakeSize) ? undefined : snakeSize,
         };
 
-        const key = await newSession(config);
+        const key = await newSession(config).finally(() => setLoading(false));
 
-        setLoading(false);
         if (key) {
             router.replace({ pathname: "/game", params: { sessionKey: key } });
         } else {
