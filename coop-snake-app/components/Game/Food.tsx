@@ -1,5 +1,10 @@
 import { Coordinate } from "@/src/binary/coordinate";
-import { ColorMatrix, Image, useImage } from "@shopify/react-native-skia";
+import {
+    ColorMatrix,
+    Image,
+    Shadow,
+    useImage,
+} from "@shopify/react-native-skia";
 import { gridPosToPixels, gridCellSize } from "@/src/scaling";
 import { colorMatrixGrayScale } from "@/src/colors";
 import { GameContextApi } from "@/src/context/gameContext";
@@ -42,6 +47,9 @@ export function Food(props: FoodProperties) {
         >
             {props.playerId !== props.ctx.me() && (
                 <ColorMatrix matrix={colorMatrixGrayScale} />
+            )}
+            {props.playerId === props.ctx.me() && (
+                <Shadow blur={5} dx={0} dy={0} color={"#f59e0b"} />
             )}
         </Image>
     );
