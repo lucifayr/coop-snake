@@ -40,7 +40,7 @@ export default function NewSessionScreen() {
     const [error, setError] = useState<FieldError | undefined>(undefined);
     const [teamName, setTeamName] = useState("");
     const [playerCount, setPlayerCount] = useState(2);
-    const [boardSize, setBoardSize] = useState(32);
+    const [boardSize, setBoardSize] = useState(24);
     const [snakeSize, setSnakeSize] = useState(3);
 
     const onSubmit = async () => {
