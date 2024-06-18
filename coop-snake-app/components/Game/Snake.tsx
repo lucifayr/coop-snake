@@ -1,12 +1,18 @@
 import { assert } from "@/src/assert";
 import { Coordinate } from "@/src/binary/coordinate";
 import {
+    BlurMask,
     ColorMatrix,
     Group,
     Image,
+    Morphology,
+    Paint,
+    RadialGradient,
     RoundedRect,
+    Shadow,
     SkImage,
     useImage,
+    vec,
 } from "@shopify/react-native-skia";
 import { gridPosToPixels, gridCellSize } from "@/src/scaling";
 import { snakeSegmentDir } from "@/src/binary/utils";
@@ -141,7 +147,11 @@ function pickSegmentImage(
 
 export function Snake(props: SnakeProperties) {
     const sprites = useSprites();
-    const colorMatrix = getSnakeColorMatrix(
+
+    const colorMatrixWhite = [
+        1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 0, 1, 0,
+    ];
+    const colorMatrixSnakeColor = getSnakeColorMatrix(
         props.playerId,
         props.ctx.getSessionKey(),
     );
@@ -176,20 +186,9 @@ export function Snake(props: SnakeProperties) {
             coord.y,
             canvasWidth,
         );
-
         const size = gridCellSize(props.ctx.getBoardSize(), canvasWidth);
         return (
             <Group key={idx}>
-                {props.playerId === props.ctx.me() && (
-                    <RoundedRect
-                        r={2}
-                        color={colors.playerHighlight}
-                        width={size}
-                        height={size}
-                        x={xPos}
-                        y={yPos}
-                    />
-                )}
                 <Image
                     image={sprites[sprite]}
                     fit="cover"
@@ -198,8 +197,19 @@ export function Snake(props: SnakeProperties) {
                     x={xPos}
                     y={yPos}
                 >
-                    <ColorMatrix matrix={colorMatrix} />
+                    <Morphology radius={1}>
+                        <ColorMatrix matrix={colorMatrixSnakeColor} />
+                        <ColorMatrix matrix={colorMatrixWhite} />
+                    </Morphology>
                 </Image>
+                <Image
+                    image={sprites[sprite]}
+                    fit="cover"
+                    width={size}
+                    height={size}
+                    x={xPos}
+                    y={yPos}
+                />
             </Group>
         );
     });
