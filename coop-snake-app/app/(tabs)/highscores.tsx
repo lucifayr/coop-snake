@@ -31,7 +31,6 @@ export default function HighscoreScreenShell() {
 }
 
 function HighscoreScreen() {
-    const router = useRouter();
     const query = useQuery({ queryKey: ["scores"], queryFn: getScores });
     useRefreshOnFocus(query.refetch);
 

@@ -105,6 +105,7 @@ export default function NewSessionScreen() {
                         alignItems: "center",
                         width: "100%",
                         paddingBottom: 32,
+                        maxWidth: 500,
                     }}
                 >
                     <AppTextInput
@@ -119,6 +120,7 @@ export default function NewSessionScreen() {
                     style={{
                         alignItems: "center",
                         width: "100%",
+                        maxWidth: 500,
                     }}
                 >
                     <Text style={{ color: "#fff", fontSize: 16 }}>
@@ -143,6 +145,7 @@ export default function NewSessionScreen() {
                     style={{
                         alignItems: "center",
                         width: "100%",
+                        maxWidth: 500,
                     }}
                 >
                     <Text style={{ color: "#fff", fontSize: 16 }}>
@@ -167,6 +170,7 @@ export default function NewSessionScreen() {
                     style={{
                         alignItems: "center",
                         width: "100%",
+                        maxWidth: 500,
                     }}
                 >
                     <Text style={{ color: "#fff", fontSize: 16 }}>

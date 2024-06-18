@@ -110,9 +110,11 @@ const styles = StyleSheet.create({
         left: 0,
     },
     modalView: {
+        maxWidth: 500,
         top: "50%",
         transform: [{ translateY: -50 }],
         margin: 20,
+        marginHorizontal: "auto",
         backgroundColor: colors.bgDark,
         borderRadius: 20,
         padding: 35,
