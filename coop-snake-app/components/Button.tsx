@@ -1,17 +1,21 @@
+import { colors } from "@/src/colors";
 import { useState } from "react";
 import { Pressable, StyleSheet, Text } from "react-native";
 
-export default function Button(props: {
+export function AppButton(props: {
     text: string;
-    onClick?: () => void;
+    onClick: () => void;
     disabled?: boolean;
+    color?: string;
 }) {
-    const [buttonColor, setButtonColor] = useState("#ebd29d");
+    const [defaultColor, setDefaultColor] = useState<string>(
+        props.color ?? colors.accent,
+    );
 
     return (
         <Pressable
             style={[
-                { backgroundColor: buttonColor },
+                { backgroundColor: defaultColor },
                 styles.button,
                 props.disabled && styles.disabled,
             ]}
@@ -19,10 +23,16 @@ export default function Button(props: {
                 if (props.onClick && !props.disabled) props.onClick();
             }}
             onTouchStart={() => {
-                setButtonColor("#faffee");
+                if (!props.color) {
+                    return;
+                }
+                setDefaultColor(colors.accentLight);
             }}
             onTouchEnd={() => {
-                setButtonColor("#ebd29d");
+                if (!props.color) {
+                    return;
+                }
+                setDefaultColor(colors.accent);
             }}
         >
             <Text style={styles.buttonText}>{props.text}</Text>
@@ -39,10 +49,11 @@ const styles = StyleSheet.create({
     },
     buttonText: {
         fontSize: 20,
+        color: colors.textDark,
         textAlign: "center",
         fontWeight: "bold",
     },
     disabled: {
-        backgroundColor: "#faffee ",
+        backgroundColor: colors.disabled,
     },
 });

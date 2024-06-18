@@ -1,57 +1,77 @@
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import { Alert, StyleSheet, Text, TextInput, View } from "react-native";
+import { Alert, StyleSheet, Text, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-
-import { useForm, SubmitHandler, Controller } from "react-hook-form";
+import Slider from "@react-native-community/slider";
 import { SessionConfig, newSession } from "@/src/sessionConfig";
-import Button from "@/components/Button";
+import { colors } from "@/src/colors";
+import { AppTextInput } from "@/components/TextInput";
+import { AppButton } from "@/components/Button";
 
-type Input = {
-    teamName: "";
-    playerCount?: string;
-    boardSize?: string;
-    initialSnakeSize?: string;
+type Config = {
+    teamName: string;
+    playerCount: number;
+    boardSize: number;
+    snakeSize: number;
 };
+
+const configRules = {
+    teamName: {
+        minLen: 1,
+        maxLen: 255,
+    },
+    playerCount: {
+        minValue: 2,
+        maxValue: 8,
+    },
+    boardSize: {
+        minValue: 16,
+        maxValue: 64,
+    },
+    snakeSize: {
+        minValue: 3,
+        maxValue: 16,
+    },
+} as const satisfies { [key in keyof Config]: any };
 
 export default function NewSessionScreen() {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<FieldError | undefined>(undefined);
+    const [teamName, setTeamName] = useState("");
+    const [playerCount, setPlayerCount] = useState(2);
+    const [boardSize, setBoardSize] = useState(32);
+    const [snakeSize, setSnakeSize] = useState(3);
 
-    // TODO: form validation
-    const { control, handleSubmit } = useForm<Input>({
-        defaultValues: {
-            teamName: "",
-            playerCount: "2",
-            boardSize: "32",
-            initialSnakeSize: "3",
-        },
-    });
-
-    const onSubmit: SubmitHandler<Input> = async (data) => {
+    const onSubmit = async () => {
         if (loading) {
+            return;
+        }
+
+        const error = validateConfig({
+            teamName,
+            playerCount,
+            boardSize,
+            snakeSize,
+        });
+
+        setError(error);
+        if (error !== undefined) {
             return;
         }
 
         setLoading(true);
 
-        const playerCount = parseInt(data.playerCount ?? "");
-        const boardSize = parseInt(data.boardSize ?? "");
-        const initialSnakeSize = parseInt(data.initialSnakeSize ?? "");
-
         const config: SessionConfig = {
-            teamName: data.teamName,
+            teamName,
             playerCount: Number.isNaN(playerCount) ? undefined : playerCount,
             boardSize: Number.isNaN(boardSize) ? undefined : boardSize,
-            initialSnakeSize: Number.isNaN(initialSnakeSize)
-                ? undefined
-                : initialSnakeSize,
+            initialSnakeSize: Number.isNaN(snakeSize) ? undefined : snakeSize,
         };
 
         const key = await newSession(config);
 
         setLoading(false);
-
         if (key) {
             router.replace({ pathname: "/game", params: { sessionKey: key } });
         } else {
@@ -61,110 +81,205 @@ export default function NewSessionScreen() {
 
     return (
         <KeyboardAwareScrollView contentContainerStyle={styles.container}>
-            <View>
-                <Controller
-                    control={control}
-                    rules={{
-                        minLength: 1,
-                        maxLength: 255,
+            <View
+                style={{
+                    padding: 48,
+                    gap: 16,
+                    justifyContent: "center",
+                    alignItems: "center",
+                }}
+            >
+                <Text
+                    style={{
+                        color: colors.textLight,
+                        fontSize: 32,
+                        paddingBottom: 48,
+                        fontWeight: "bold",
                     }}
-                    render={({ field: { onChange, onBlur, value } }) => (
-                        <View style={styles.inputContainer}>
-                            <Text>Team name</Text>
-                            <TextInput
-                                style={styles.input}
-                                placeholder="name..."
-                                onBlur={onBlur}
-                                onChangeText={onChange}
-                                value={value}
-                            />
-                        </View>
-                    )}
-                    name="teamName"
-                />
-                <Controller
-                    control={control}
-                    rules={{
-                        maxLength: 3,
-                    }}
-                    render={({ field: { onChange, onBlur, value } }) => (
-                        <View style={styles.inputContainer}>
-                            <Text>Player count</Text>
-                            <TextInput
-                                style={styles.input}
-                                keyboardType="numeric"
-                                placeholder="count..."
-                                onBlur={onBlur}
-                                onChangeText={onChange}
-                                value={value}
-                            />
-                        </View>
-                    )}
-                    name="playerCount"
-                />
+                >
+                    Create Session
+                </Text>
 
-                <Controller
-                    control={control}
-                    rules={{
-                        maxLength: 3,
+                <View
+                    style={{
+                        alignItems: "center",
+                        width: "100%",
+                        paddingBottom: 32,
                     }}
-                    render={({ field: { onChange, onBlur, value } }) => (
-                        <View style={styles.inputContainer}>
-                            <Text>Board size</Text>
-                            <TextInput
-                                style={styles.input}
-                                keyboardType="numeric"
-                                placeholder="size..."
-                                onBlur={onBlur}
-                                onChangeText={onChange}
-                                value={value}
-                            />
-                        </View>
-                    )}
-                    name="boardSize"
-                />
-
-                <Controller
-                    control={control}
-                    rules={{
-                        maxLength: 3,
+                >
+                    <AppTextInput
+                        placeholder="team name..."
+                        maxLength={configRules.teamName.maxLen}
+                        onChangeText={(text) => {
+                            setTeamName(text);
+                        }}
+                    />
+                </View>
+                <View
+                    style={{
+                        alignItems: "center",
+                        width: "100%",
                     }}
-                    render={({ field: { onChange, onBlur, value } }) => (
-                        <View style={styles.inputContainer}>
-                            <Text>Snake size</Text>
-                            <TextInput
-                                style={styles.input}
-                                keyboardType="numeric"
-                                placeholder="size..."
-                                onBlur={onBlur}
-                                onChangeText={onChange}
-                                value={value}
-                            />
-                        </View>
-                    )}
-                    name="initialSnakeSize"
-                />
+                >
+                    <Text style={{ color: "#fff", fontSize: 16 }}>
+                        Board Size : {boardSize.toString().padStart(3)}
+                    </Text>
+                    <Slider
+                        style={{ width: "100%", height: 40 }}
+                        value={boardSize}
+                        onValueChange={(value) => {
+                            setBoardSize(value);
+                        }}
+                        step={1}
+                        minimumValue={configRules.boardSize.minValue}
+                        maximumValue={configRules.boardSize.maxValue}
+                        thumbTintColor={colors.accent}
+                        minimumTrackTintColor={colors.accent}
+                        maximumTrackTintColor={colors.bgLight}
+                    />
+                </View>
 
-                <Button text="Submit" onClick={handleSubmit(onSubmit)} />
+                <View
+                    style={{
+                        alignItems: "center",
+                        width: "100%",
+                    }}
+                >
+                    <Text style={{ color: "#fff", fontSize: 16 }}>
+                        Player count : {playerCount.toString().padStart(3)}
+                    </Text>
+                    <Slider
+                        style={{ width: "100%", height: 40 }}
+                        value={playerCount}
+                        onValueChange={(value) => {
+                            setPlayerCount(value);
+                        }}
+                        step={1}
+                        minimumValue={configRules.playerCount.minValue}
+                        maximumValue={configRules.playerCount.maxValue}
+                        thumbTintColor={colors.accent}
+                        minimumTrackTintColor={colors.accent}
+                        maximumTrackTintColor={colors.bgLight}
+                    />
+                </View>
+
+                <View
+                    style={{
+                        alignItems: "center",
+                        width: "100%",
+                    }}
+                >
+                    <Text style={{ color: "#fff", fontSize: 16 }}>
+                        Snake size : {snakeSize.toString().padStart(3)}
+                    </Text>
+                    <Slider
+                        style={{ width: "100%", height: 40 }}
+                        value={snakeSize}
+                        onValueChange={(value) => {
+                            setSnakeSize(value);
+                        }}
+                        step={1}
+                        minimumValue={configRules.snakeSize.minValue}
+                        maximumValue={configRules.snakeSize.maxValue}
+                        thumbTintColor={colors.accent}
+                        minimumTrackTintColor={colors.accent}
+                        maximumTrackTintColor={colors.bgLight}
+                    />
+                </View>
+                <AppButton text="Submit" onClick={onSubmit} />
+                <FieldErrorView error={error} />
             </View>
         </KeyboardAwareScrollView>
     );
 }
 
+function FieldErrorView({ error }: { error: FieldError | undefined }) {
+    let inner = null;
+    if (error) {
+        inner = (
+            <Text
+                style={{
+                    color: colors.deny,
+                    width: "100%",
+                    fontSize: 16,
+                    textAlign: "center",
+                    fontWeight: "bold",
+                }}
+            >
+                {fieldDisplayName(error.field)} : {kindDisplayName(error.kind)}
+            </Text>
+        );
+    }
+
+    return <View style={{ height: 48, width: "100%" }}>{inner}</View>;
+}
+
+function kindDisplayName(kind: FieldErrorKind): string {
+    switch (kind) {
+        case "minValue":
+            return "Value too small";
+        case "maxValue":
+            return "Value too large";
+        case "minLen":
+            return "Too short";
+        case "maxLen":
+            return "Too long";
+    }
+}
+
+function fieldDisplayName(field: FieldWithError): string {
+    switch (field) {
+        case "teamName":
+            return "Team name";
+        case "playerCount":
+            return "Player count";
+        case "boardSize":
+            return "Board size";
+        case "snakeSize":
+            return "Snake size";
+    }
+}
+
+type FieldWithError = keyof Config;
+type FieldErrorKind = "minValue" | "maxValue" | "minLen" | "maxLen";
+type FieldError = { field: FieldWithError; kind: FieldErrorKind };
+
+function validateConfig(config: Config): FieldError | undefined {
+    if (config.teamName.length < configRules.teamName.minLen) {
+        return { field: "teamName", kind: "minLen" };
+    }
+    if (config.teamName.length > configRules.teamName.maxLen) {
+        return { field: "teamName", kind: "maxLen" };
+    }
+
+    if (config.boardSize < configRules.boardSize.minValue) {
+        return { field: "boardSize", kind: "minValue" };
+    }
+    if (config.boardSize > configRules.boardSize.maxValue) {
+        return { field: "boardSize", kind: "maxValue" };
+    }
+
+    if (config.playerCount < configRules.playerCount.minValue) {
+        return { field: "playerCount", kind: "minValue" };
+    }
+    if (config.playerCount > configRules.playerCount.maxValue) {
+        return { field: "playerCount", kind: "maxValue" };
+    }
+
+    if (config.snakeSize < configRules.playerCount.minValue) {
+        return { field: "snakeSize", kind: "minValue" };
+    }
+    if (config.snakeSize > configRules.playerCount.maxValue) {
+        return { field: "snakeSize", kind: "maxValue" };
+    }
+
+    return undefined;
+}
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#EBAB9D",
-        padding: 20,
-    },
-    inputContainer: {
-        width: "100%",
-        padding: 12,
-    },
-    input: {
-        height: 40,
-        margin: 12,
-        borderWidth: 1,
-        padding: 10,
+        justifyContent: "center",
+        backgroundColor: colors.bg,
     },
 });

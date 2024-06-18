@@ -15,6 +15,8 @@ import {
     QueryClientProvider,
 } from "@tanstack/react-query";
 import { useRefreshOnFocus } from "@/src/binary/utils";
+import { colors } from "@/src/colors";
+import { BackButton } from "@/components/Back";
 
 // TODO: update info text styling
 
@@ -35,21 +37,7 @@ function HighscoreScreen() {
 
     return (
         <View style={styles.container}>
-            <Pressable
-                style={{
-                    display: "flex",
-                    flexWrap: "nowrap",
-                    flexDirection: "row",
-                    marginBottom: 10,
-                    width: "100%",
-                }}
-                onPress={() => router.navigate("/home")}
-            >
-                <AntDesign name="caretleft" size={24} color="white" />
-                <Text style={{ color: "white", fontSize: 20 }}>Back</Text>
-            </Pressable>
-
-            <StatusBar backgroundColor="#EBAB9D" />
+            <StatusBar backgroundColor={colors.bgDark} />
             <Text style={styles.header}>Today's High scores</Text>
             {query.isLoading && <ActivityIndicator size="large" />}
             {query.error && <Text>Failed to fetch High scores</Text>}
@@ -71,6 +59,7 @@ function HighscoreScreen() {
                     )}
                 ></FlatList>
             )}
+            <BackButton />
         </View>
     );
 }
@@ -97,8 +86,8 @@ async function getScores(): Promise<{ teamName: string; score: number }[]> {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#EBAB9D",
         padding: 20,
+        backgroundColor: colors.bg,
     },
     button: {
         alignSelf: "flex-start",
@@ -107,20 +96,20 @@ const styles = StyleSheet.create({
         fontSize: 32,
         alignSelf: "center",
         fontWeight: "bold",
-        color: "#faffee",
         marginBottom: 20,
+        color: colors.textLight,
     },
     highscore: {
         flexDirection: "row",
         justifyContent: "space-between",
         padding: 10,
         marginVertical: 5,
-        backgroundColor: "#faffee",
+        backgroundColor: colors.accent,
         borderRadius: 5,
     },
     highscoreText: {
         fontSize: 20,
-        color: "#EBAB9D",
         fontWeight: "700",
+        color: colors.textDark,
     },
 });

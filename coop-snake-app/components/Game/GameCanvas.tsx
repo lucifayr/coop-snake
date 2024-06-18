@@ -51,7 +51,7 @@ function gridLines(
         return (
             <Line
                 key={idx}
-                color={colors.gameBorders}
+                color={colors.bgLight}
                 p1={{ x: x1, y: y1 }}
                 p2={{ x: x2, y: y2 }}
             />
@@ -69,7 +69,7 @@ function gridLines(
         return (
             <Line
                 key={idx + boardSize}
-                color={colors.gameBorders}
+                color={colors.bgLight}
                 p1={{ x: x1, y: y1 }}
                 p2={{ x: x2, y: y2 }}
             />

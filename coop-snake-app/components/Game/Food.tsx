@@ -1,12 +1,7 @@
 import { Coordinate } from "@/src/binary/coordinate";
-import {
-    Group,
-    Image,
-    RoundedRect,
-    useImage,
-} from "@shopify/react-native-skia";
+import { ColorMatrix, Image, useImage } from "@shopify/react-native-skia";
 import { gridPosToPixels, gridCellSize } from "@/src/scaling";
-import { colors } from "@/src/colors";
+import { colorMatrixWhite } from "@/src/colors";
 import { GameContextApi } from "@/src/context/gameContext";
 
 export type FoodProperties = {
@@ -37,25 +32,17 @@ export function Food(props: FoodProperties) {
     );
 
     return (
-        <Group>
-            {props.playerId === props.ctx.me() && (
-                <RoundedRect
-                    r={2}
-                    color={colors.playerHighlight}
-                    width={size}
-                    height={size}
-                    x={xPos}
-                    y={yPos}
-                />
+        <Image
+            image={sprite}
+            fit="cover"
+            width={size}
+            height={size}
+            x={xPos}
+            y={yPos}
+        >
+            {props.playerId !== props.ctx.me() && (
+                <ColorMatrix matrix={colorMatrixWhite} />
             )}
-            <Image
-                image={sprite}
-                fit="cover"
-                width={size}
-                height={size}
-                x={xPos}
-                y={yPos}
-            />
-        </Group>
+        </Image>
     );
 }

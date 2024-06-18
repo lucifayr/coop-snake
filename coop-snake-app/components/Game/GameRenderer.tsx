@@ -136,7 +136,7 @@ function GameScreenContainer({
     const { width, height } = useWindowDimensions();
 
     return (
-        <GestureHandlerRootView style={{ width: "100%", height: "100%" }}>
+        <GestureHandlerRootView style={{ width: "100%", flex: 1 }}>
             <View style={styles.container}>
                 <GestureDetector gesture={onSwipe}>
                     <View style={{ height: "100%", width: "100%" }}>
@@ -176,7 +176,7 @@ const styles = StyleSheet.create({
     gamepane: {
         aspectRatio: 1,
         alignSelf: "center",
-        borderColor: colors.gameBorders,
+        borderColor: colors.bgLight,
         borderStyle: "solid",
         borderWidth: 2,
         borderRadius: 10,

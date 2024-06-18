@@ -1,12 +1,21 @@
 export const colors = {
-    playerHighlight: "#eab308",
-    gameBorders: "#a3a3a3",
-    bgDark: "#171717",
+    textLight: "#ffffff",
+    textDark: "#000000",
+    textGray: "#737373",
     bg: "#27272a",
-    confirm: "green",
-    deny: "red",
-    disabled: "#262626",
+    bgLight: "#e5e5e5",
+    bgDark: "#171717",
+    accent: "#34d399",
+    accentLight: "#a7f3d0",
+    accentDark: "#059669",
+    confirm: "#16a34a",
+    deny: "#dc2626",
+    disabled: "#292524",
 } as const;
+
+export const colorMatrixWhite: number[] = [
+    1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 0, 1, 0,
+] as const;
 
 const snakeColors = [
     "#fde047",
@@ -14,7 +23,7 @@ const snakeColors = [
     "#22c55e",
     "#3b82f6",
     "#a855f7",
-    "#f9a8d4",
+    "#f97316",
 ] as const;
 
 export function getSnakeColorMatrix(

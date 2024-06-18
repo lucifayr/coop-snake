@@ -1,3 +1,4 @@
+import { BackButton } from "../Back";
 import {
     binMsgFromData,
     binMsgIntoBytes,
@@ -117,42 +118,52 @@ export default function GameScreenInteractive() {
     }
 
     return (
-        <GameRenderer
-            onSwipe={swipeGestures(ctx, {
-                UP: () => {
-                    const msg = swipeInputMsg(
-                        "up",
-                        ctx.getTickN(),
-                        token.current,
-                    );
-                    socket?.send(binMsgIntoBytes(msg));
-                },
-                RIGHT: () => {
-                    const msg = swipeInputMsg(
-                        "right",
-                        ctx.getTickN(),
-                        token.current,
-                    );
-                    socket?.send(binMsgIntoBytes(msg));
-                },
-                DOWN: () => {
-                    const msg = swipeInputMsg(
-                        "down",
-                        ctx.getTickN(),
-                        token.current,
-                    );
-                    socket?.send(binMsgIntoBytes(msg));
-                },
-                LEFT: () => {
-                    const msg = swipeInputMsg(
-                        "left",
-                        ctx.getTickN(),
-                        token.current,
-                    );
-                    socket?.send(binMsgIntoBytes(msg));
-                },
-            })}
-        />
+        <View
+            style={{
+                backgroundColor: colors.bg,
+                height: "100%",
+                width: "100%",
+                padding: 8,
+            }}
+        >
+            <GameRenderer
+                onSwipe={swipeGestures(ctx, {
+                    UP: () => {
+                        const msg = swipeInputMsg(
+                            "up",
+                            ctx.getTickN(),
+                            token.current,
+                        );
+                        socket?.send(binMsgIntoBytes(msg));
+                    },
+                    RIGHT: () => {
+                        const msg = swipeInputMsg(
+                            "right",
+                            ctx.getTickN(),
+                            token.current,
+                        );
+                        socket?.send(binMsgIntoBytes(msg));
+                    },
+                    DOWN: () => {
+                        const msg = swipeInputMsg(
+                            "down",
+                            ctx.getTickN(),
+                            token.current,
+                        );
+                        socket?.send(binMsgIntoBytes(msg));
+                    },
+                    LEFT: () => {
+                        const msg = swipeInputMsg(
+                            "left",
+                            ctx.getTickN(),
+                            token.current,
+                        );
+                        socket?.send(binMsgIntoBytes(msg));
+                    },
+                })}
+            />
+            <BackButton />
+        </View>
     );
 }
 

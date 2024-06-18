@@ -1,14 +1,15 @@
-import Button from "@/components/Button";
+import { AppButton } from "@/components/Button";
+import { AppTextInput } from "@/components/TextInput";
+import { colors } from "@/src/colors";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useRouter } from "expo-router";
 import { useRef, useState } from "react";
 import {
-    Button as Btn,
     ImageBackground,
     Modal,
     StatusBar,
     StyleSheet,
-    TextInput,
+    Text,
     View,
 } from "react-native";
 
@@ -21,25 +22,34 @@ export default function HomeScreen() {
     const handleModal = () => setIsModalVisible(() => !isModalVisible);
 
     return (
-        <ImageBackground
-            style={[styles.background, { top: -headerHeight ?? 0 }]}
-            source={require("@/assets/images/background.png")}
-        >
-            <StatusBar backgroundColor="#EBAB9D" translucent />
+        <View style={{ top: -headerHeight ?? 0, flex: 1 }}>
+            <StatusBar backgroundColor={colors.bgDark} translucent />
 
-            <View style={styles.container}>
-                <Button
-                    onClick={() => router.navigate("/new-session")}
-                    text="Create new Game"
-                />
-                <Button
-                    onClick={() => setIsModalVisible(true)}
-                    text="Join Game"
-                />
-                <Button
-                    onClick={() => router.navigate("/highscores")}
-                    text="View High scores"
-                />
+            <View style={styles.containerOuter}>
+                <Text
+                    style={{
+                        color: colors.textLight,
+                        fontWeight: "bold",
+                        fontSize: 48,
+                    }}
+                >
+                    Snake along
+                </Text>
+
+                <View style={styles.containerInner}>
+                    <AppButton
+                        onClick={() => router.navigate("/new-session")}
+                        text="Create new Game"
+                    />
+                    <AppButton
+                        onClick={() => setIsModalVisible(true)}
+                        text="Join Game"
+                    />
+                    <AppButton
+                        onClick={() => router.navigate("/highscores")}
+                        text="View High scores"
+                    />
+                </View>
             </View>
 
             <Modal
@@ -51,14 +61,14 @@ export default function HomeScreen() {
                 }}
             >
                 <View style={styles.modalView}>
-                    <TextInput
+                    <AppTextInput
                         placeholder="000000"
                         maxLength={6}
                         onChangeText={(text) => {
                             sessionKey.current = text;
                         }}
                     />
-                    <Button
+                    <AppButton
                         onClick={() => {
                             setIsModalVisible(false);
                             router.replace({
@@ -67,26 +77,32 @@ export default function HomeScreen() {
                             });
                         }}
                         text="Join"
-                    ></Button>
-                    <Btn title="Close" color="#ebd29d" onPress={handleModal} />
+                    ></AppButton>
+                    <AppButton
+                        text="Close"
+                        color={colors.deny}
+                        onClick={handleModal}
+                    />
                 </View>
             </Modal>
-        </ImageBackground>
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
-    background: {
+    containerOuter: {
         flex: 1,
-        transform: [{ rotate: "180deg" }],
+        justifyContent: "space-between",
+        alignItems: "center",
+        paddingVertical: 24,
+        backgroundColor: colors.bg,
     },
-    container: {
+    containerInner: {
         flex: 1,
         gap: 20,
         paddingBottom: 40,
         justifyContent: "flex-end",
         alignItems: "center",
-        transform: [{ rotate: "180deg" }],
     },
     centeredView: {
         top: 0,
@@ -97,7 +113,7 @@ const styles = StyleSheet.create({
         top: "50%",
         transform: [{ translateY: -50 }],
         margin: 20,
-        backgroundColor: "white",
+        backgroundColor: colors.bgDark,
         borderRadius: 20,
         padding: 35,
         alignItems: "center",

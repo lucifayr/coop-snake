@@ -1,23 +1,17 @@
 import { assert } from "@/src/assert";
 import { Coordinate } from "@/src/binary/coordinate";
 import {
-    BlurMask,
     ColorMatrix,
     Group,
     Image,
     Morphology,
-    Paint,
-    RadialGradient,
-    RoundedRect,
-    Shadow,
     SkImage,
     useImage,
-    vec,
 } from "@shopify/react-native-skia";
 import { gridPosToPixels, gridCellSize } from "@/src/scaling";
 import { snakeSegmentDir } from "@/src/binary/utils";
 import { GameContextApi, SnakeDirection } from "@/src/context/gameContext";
-import { colors, getSnakeColorMatrix } from "@/src/colors";
+import { colorMatrixWhite, colors, getSnakeColorMatrix } from "@/src/colors";
 
 export type SnakeProperties = {
     ctx: GameContextApi;
@@ -148,9 +142,6 @@ function pickSegmentImage(
 export function Snake(props: SnakeProperties) {
     const sprites = useSprites();
 
-    const colorMatrixWhite = [
-        1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 0, 1, 0,
-    ];
     const colorMatrixSnakeColor = getSnakeColorMatrix(
         props.playerId,
         props.ctx.getSessionKey(),

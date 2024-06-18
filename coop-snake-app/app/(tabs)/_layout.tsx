@@ -1,3 +1,4 @@
+import { colors } from "@/src/colors";
 import { Tabs } from "expo-router";
 import React from "react";
 import { Dimensions } from "react-native";
@@ -8,9 +9,9 @@ export default function TabLayout() {
         <SafeAreaView
             style={{
                 flex: 1,
-                backgroundColor: "#EBAB9D",
-                position: "absolute",
+                backgroundColor: colors.bg,
                 top: 0,
+                bottom: 0,
                 width: "100%",
                 height: Dimensions.get("window").height,
             }}
