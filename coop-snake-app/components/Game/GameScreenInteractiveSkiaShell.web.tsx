@@ -1,12 +1,12 @@
 import { WithSkiaWeb } from "@shopify/react-native-skia/lib/module/web";
-import { Text } from "react-native";
+import { LoadingSkia } from "./LoadingSkia";
 
 export default function GameScreen() {
     return (
         <WithSkiaWeb
             // @ts-ignore
             getComponent={() => import("./GameScreenInteractive")}
-            fallback={<Text>Loading Skia...</Text>}
+            fallback={<LoadingSkia />}
         />
     );
 }
