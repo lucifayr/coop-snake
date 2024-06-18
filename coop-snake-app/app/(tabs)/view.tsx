@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useLocalSearchParams } from "expo-router";
 import { FlatList, Text, View, useWindowDimensions } from "react-native";
 
-const cellWidth = 600;
+const cellWidth = 700;
 const queryClient = new QueryClient();
 
 export default function GameScreenShell() {
