@@ -20,12 +20,12 @@ export const colorMatrixGrayScale: number[] = [
 
 const snakeColors = [
     "#fde047",
-    "#f97316",
+    "#a5f3fc",
     "#f43f5e",
-    "#a3e635",
     "#22c55e",
     "#2563eb",
-    "#a5f3fc",
+    "#f97316",
+    "#a3e635",
     "#a855f7",
 ] as const;
 
