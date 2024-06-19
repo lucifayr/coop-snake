@@ -1,3 +1,11 @@
+import { BackButton } from "@/components/Back";
+import { useRefreshOnFocus } from "@/src/binary/utils";
+import { colors } from "@/src/colors";
+import {
+    QueryClient,
+    QueryClientProvider,
+    useQuery,
+} from "@tanstack/react-query";
 import { StatusBar } from "expo-status-bar";
 import {
     ActivityIndicator,
@@ -6,14 +14,6 @@ import {
     Text,
     View,
 } from "react-native";
-import {
-    useQuery,
-    QueryClient,
-    QueryClientProvider,
-} from "@tanstack/react-query";
-import { useRefreshOnFocus } from "@/src/binary/utils";
-import { colors } from "@/src/colors";
-import { BackButton } from "@/components/Back";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +31,8 @@ function HighscoreScreen() {
 
     return (
         <View style={styles.container}>
+            <BackButton />
+
             <StatusBar backgroundColor={colors.bgDark} />
             <Text style={styles.header}>Today's High scores</Text>
             {query.isLoading && <ActivityIndicator size="large" />}
@@ -53,7 +55,6 @@ function HighscoreScreen() {
                     )}
                 ></FlatList>
             )}
-            <BackButton />
         </View>
     );
 }

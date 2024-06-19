@@ -1,12 +1,13 @@
+import { BackButton } from "@/components/Back";
+import { AppButton } from "@/components/Button";
+import { AppTextInput } from "@/components/TextInput";
+import { colors } from "@/src/colors";
+import { SessionConfig, newSession } from "@/src/sessionConfig";
+import Slider from "@react-native-community/slider";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { Alert, StyleSheet, Text, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import Slider from "@react-native-community/slider";
-import { SessionConfig, newSession } from "@/src/sessionConfig";
-import { colors } from "@/src/colors";
-import { AppTextInput } from "@/components/TextInput";
-import { AppButton } from "@/components/Button";
 
 type Config = {
     teamName: string;
@@ -44,9 +45,7 @@ export default function NewSessionScreen() {
     const [snakeSize, setSnakeSize] = useState(3);
 
     const onSubmit = async () => {
-        if (loading) {
-            return;
-        }
+        if (loading) return;
 
         const error = validateConfig({
             teamName,
@@ -56,9 +55,7 @@ export default function NewSessionScreen() {
         });
 
         setError(error);
-        if (error !== undefined) {
-            return;
-        }
+        if (error !== undefined) return;
 
         setLoading(true);
 
@@ -88,45 +85,23 @@ export default function NewSessionScreen() {
                     alignItems: "center",
                 }}
             >
-                <Text
-                    style={{
-                        color: colors.textLight,
-                        fontSize: 32,
-                        paddingBottom: 48,
-                        fontWeight: "bold",
-                    }}
-                >
-                    Create Session
-                </Text>
+                <BackButton />
 
-                <View
-                    style={{
-                        alignItems: "center",
-                        width: "100%",
-                        paddingBottom: 32,
-                        maxWidth: 500,
-                    }}
-                >
+                <Text style={styles.header}>Create Session</Text>
+
+                <View style={[styles.containerChild, { paddingBottom: 32 }]}>
                     <AppTextInput
-                        placeholder="team name..."
+                        placeholder="Team name..."
                         maxLength={configRules.teamName.maxLen}
-                        onChangeText={(text) => {
-                            setTeamName(text);
-                        }}
+                        onChangeText={(text) => setTeamName(text)}
                     />
                 </View>
-                <View
-                    style={{
-                        alignItems: "center",
-                        width: "100%",
-                        maxWidth: 500,
-                    }}
-                >
-                    <Text style={{ color: "#fff", fontSize: 16 }}>
+                <View style={styles.containerChild}>
+                    <Text style={{ color: colors.textLight, fontSize: 16 }}>
                         Board Size : {boardSize.toString().padStart(3)}
                     </Text>
                     <Slider
-                        style={{ width: "100%", height: 40 }}
+                        style={styles.slider}
                         value={boardSize}
                         onValueChange={(value) => {
                             setBoardSize(value);
@@ -140,18 +115,12 @@ export default function NewSessionScreen() {
                     />
                 </View>
 
-                <View
-                    style={{
-                        alignItems: "center",
-                        width: "100%",
-                        maxWidth: 500,
-                    }}
-                >
-                    <Text style={{ color: "#fff", fontSize: 16 }}>
+                <View style={styles.containerChild}>
+                    <Text style={{ color: colors.textLight, fontSize: 16 }}>
                         Player count : {playerCount.toString().padStart(3)}
                     </Text>
                     <Slider
-                        style={{ width: "100%", height: 40 }}
+                        style={styles.slider}
                         value={playerCount}
                         onValueChange={(value) => {
                             setPlayerCount(value);
@@ -165,22 +134,14 @@ export default function NewSessionScreen() {
                     />
                 </View>
 
-                <View
-                    style={{
-                        alignItems: "center",
-                        width: "100%",
-                        maxWidth: 500,
-                    }}
-                >
-                    <Text style={{ color: "#fff", fontSize: 16 }}>
+                <View style={styles.containerChild}>
+                    <Text style={{ color: colors.textLight, fontSize: 16 }}>
                         Snake size : {snakeSize.toString().padStart(3)}
                     </Text>
                     <Slider
-                        style={{ width: "100%", height: 40 }}
+                        style={styles.slider}
                         value={snakeSize}
-                        onValueChange={(value) => {
-                            setSnakeSize(value);
-                        }}
+                        onValueChange={(value) => setSnakeSize(value)}
                         step={1}
                         minimumValue={configRules.snakeSize.minValue}
                         maximumValue={configRules.snakeSize.maxValue}
@@ -285,4 +246,16 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         backgroundColor: colors.bg,
     },
+    containerChild: {
+        alignItems: "center",
+        width: "100%",
+        maxWidth: 500,
+    },
+    header: {
+        color: colors.textLight,
+        fontSize: 32,
+        paddingBottom: 48,
+        fontWeight: "bold",
+    },
+    slider: { width: "100%", height: 40 },
 });

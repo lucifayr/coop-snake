@@ -3,8 +3,11 @@ import { AppTextInput } from "@/components/TextInput";
 import { colors } from "@/src/colors";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useRouter } from "expo-router";
-import { useRef, useState } from "react";
-import { Modal, StatusBar, StyleSheet, Text, View } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { Animated, Modal, StyleSheet, View } from "react-native";
+
+const text = "Snake along";
+const animationDuration = 500;
 
 export default function HomeScreen() {
     const headerHeight = useHeaderHeight();
@@ -14,20 +17,70 @@ export default function HomeScreen() {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const handleModal = () => setIsModalVisible(() => !isModalVisible);
 
+    const animatedValues = useRef(
+        Array.from(
+            { length: text.length },
+            () => new Animated.ValueXY({ x: 0, y: 0 }),
+        ),
+    ).current;
+
+    useEffect(() => {
+        const createAnimation = (
+            animatedValue: Animated.ValueXY,
+            delay: number,
+        ) =>
+            Animated.sequence([
+                Animated.timing(animatedValue, {
+                    toValue: { x: 30, y: 0 },
+                    duration: animationDuration,
+                    delay,
+                    useNativeDriver: true,
+                }),
+                Animated.timing(animatedValue, {
+                    toValue: { x: 30, y: 30 },
+                    duration: animationDuration,
+                    useNativeDriver: true,
+                }),
+                Animated.timing(animatedValue, {
+                    toValue: { x: 0, y: 30 },
+                    duration: animationDuration,
+                    useNativeDriver: true,
+                }),
+                Animated.timing(animatedValue, {
+                    toValue: { x: 0, y: 0 },
+                    duration: animationDuration,
+                    useNativeDriver: true,
+                }),
+            ]);
+
+        const animations = animatedValues.map((animatedValue, index) =>
+            createAnimation(animatedValue, index * 100),
+        );
+
+        Animated.loop(Animated.stagger(100, animations)).start();
+    }, [animatedValues]);
+
     return (
         <View style={{ top: -headerHeight ?? 0, flex: 1 }}>
-            <StatusBar backgroundColor={colors.bgDark} translucent />
-
             <View style={styles.containerOuter}>
-                <Text
-                    style={{
-                        color: colors.textLight,
-                        fontWeight: "bold",
-                        fontSize: 48,
-                    }}
-                >
-                    Snake along
-                </Text>
+                <View style={styles.animatedTextContainer}>
+                    {text.split("").map((char, index) => (
+                        <Animated.Text
+                            key={index}
+                            style={[
+                                styles.animatedText,
+                                {
+                                    transform:
+                                        animatedValues[
+                                            index
+                                        ].getTranslateTransform(),
+                                },
+                            ]}
+                        >
+                            {char}
+                        </Animated.Text>
+                    ))}
+                </View>
 
                 <View style={styles.containerInner}>
                     <AppButton
@@ -85,43 +138,32 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
     containerOuter: {
         flex: 1,
-        justifyContent: "space-between",
         alignItems: "center",
-        paddingVertical: 24,
+        justifyContent: "space-between",
+        paddingVertical: 80,
         backgroundColor: colors.bg,
     },
     containerInner: {
-        flex: 1,
         gap: 20,
-        paddingBottom: 40,
-        justifyContent: "flex-end",
-        alignItems: "center",
-    },
-    centeredView: {
-        top: 0,
-        bottom: 0,
-        left: 0,
     },
     modalView: {
         maxWidth: 500,
         top: "50%",
         transform: [{ translateY: -50 }],
-        margin: 20,
         marginHorizontal: "auto",
         backgroundColor: colors.bgDark,
         borderRadius: 20,
         padding: 35,
-        alignItems: "center",
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 4,
-        elevation: 5,
-        display: "flex",
-        flexDirection: "column",
         gap: 20,
+    },
+    animatedTextContainer: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        justifyContent: "center",
+    },
+    animatedText: {
+        color: colors.textLight,
+        fontWeight: "bold",
+        fontSize: 48,
     },
 });

@@ -1,3 +1,4 @@
+import { colors } from "@/src/colors";
 import { AntDesign } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { Pressable, Text } from "react-native";
@@ -15,7 +16,7 @@ export function BackButton() {
             }}
             onPress={() => router.replace("/home")}
         >
-            <AntDesign name="caretleft" size={24} color="white" />
+            <AntDesign name="caretleft" size={24} color={colors.textLight} />
             <Text style={{ color: "white", fontSize: 20 }}>Back</Text>
         </Pressable>
     );

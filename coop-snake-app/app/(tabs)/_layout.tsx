@@ -1,33 +1,35 @@
 import { colors } from "@/src/colors";
 import { Tabs } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import React from "react";
-import { Dimensions } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
 export default function TabLayout() {
     return (
-        <SafeAreaView
-            style={{
-                flex: 1,
-                backgroundColor: colors.bg,
-                top: 0,
-                bottom: 0,
-                width: "100%",
-                height: Dimensions.get("window").height,
-            }}
-        >
-            <Tabs
-                screenOptions={{
-                    tabBarStyle: {
-                        display: "none",
-                    },
-                    headerShown: false,
-                }}
-            >
-                <Tabs.Screen name="home" />
-                <Tabs.Screen name="game" />
-                <Tabs.Screen name="highscores" />
-            </Tabs>
-        </SafeAreaView>
+        <>
+            <StatusBar backgroundColor={colors.bg} hidden={true}></StatusBar>
+
+            <SafeAreaProvider>
+                <SafeAreaView
+                    style={{
+                        flex: 1,
+                        backgroundColor: colors.bg,
+                    }}
+                >
+                    <Tabs
+                        screenOptions={{
+                            tabBarStyle: {
+                                display: "none",
+                            },
+                            headerShown: false,
+                        }}
+                    >
+                        <Tabs.Screen name="home" />
+                        <Tabs.Screen name="game" />
+                        <Tabs.Screen name="highscores" />
+                    </Tabs>
+                </SafeAreaView>
+            </SafeAreaProvider>
+        </>
     );
 }
