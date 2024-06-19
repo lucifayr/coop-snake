@@ -230,10 +230,10 @@ function validateConfig(config: Config): FieldError | undefined {
         return { field: "playerCount", kind: "maxValue" };
     }
 
-    if (config.snakeSize < configRules.playerCount.minValue) {
+    if (config.snakeSize < configRules.snakeSize.minValue) {
         return { field: "snakeSize", kind: "minValue" };
     }
-    if (config.snakeSize > configRules.playerCount.maxValue) {
+    if (config.snakeSize > configRules.snakeSize.maxValue) {
         return { field: "snakeSize", kind: "maxValue" };
     }
 
